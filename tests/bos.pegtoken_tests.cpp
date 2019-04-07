@@ -23,7 +23,7 @@ class bos_pegtoken_tester : public tester
    {
       produce_blocks(2);
 
-      create_accounts({N(alice), N(bob), N(eosio.token), N(btc.bos), N(issuer.bank), N(auditor.bank)});
+      create_accounts({N(alice), N(bob), N(eosio.token), N(btc.bos), N(issuer.bank), N(auditor.bank), N(gather.bank), N(teller.bank), N(manager.bank)});
       produce_blocks(2);
 
       set_code(N(btc.bos), contracts::pegtoken_wasm());
@@ -49,13 +49,40 @@ class bos_pegtoken_tester : public tester
       return base_tester::push_action(std::move(act), uint64_t(signer));
    }
 
-   fc::variant get_auditor(const string &symbolname)
+   fc::variant get_auditor(const name aud, const string &symbolname)
    {
       auto symb = eosio::chain::symbol::from_string(symbolname);
       auto symbol_code = symb.to_symbol_code().value;
       //
-      vector<char> data = get_row_by_account(N(btc.bos), symbol_code, N(auditors), symbol_code);
+      vector<char> data = get_row_by_account(N(btc.bos), symbol_code, N(auditors), aud.value);
       return data.empty() ? fc::variant() : abi_ser.binary_to_variant("auditor_ts", data, abi_serializer_max_time);
+   }
+
+   fc::variant get_gatherer(const name gat, const string &symbolname)
+   {
+      auto symb = eosio::chain::symbol::from_string(symbolname);
+      auto symbol_code = symb.to_symbol_code().value;
+      //
+      vector<char> data = get_row_by_account(N(btc.bos), symbol_code, N(gatherers), gat.value);
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant("gatherer_ts", data, abi_serializer_max_time);
+   }
+
+   fc::variant get_teller(const name tel, const string &symbolname)
+   {
+      auto symb = eosio::chain::symbol::from_string(symbolname);
+      auto symbol_code = symb.to_symbol_code().value;
+      //
+      vector<char> data = get_row_by_account(N(btc.bos), symbol_code, N(tellers), tel.value);
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant("teller_ts", data, abi_serializer_max_time);
+   }
+
+   fc::variant get_manager(const name mgr, const string &symbolname)
+   {
+      auto symb = eosio::chain::symbol::from_string(symbolname);
+      auto symbol_code = symb.to_symbol_code().value;
+      //
+      vector<char> data = get_row_by_account(N(btc.bos), symbol_code, N(managers), mgr.value);
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant("manager_ts", data, abi_serializer_max_time);
    }
 
    fc::variant get_symbols(const string &symbolname)
@@ -178,13 +205,59 @@ try
    auto syms = get_symbols("8,BTC");
    REQUIRE_MATCHING_OBJECT(syms, mvo()("sym", symbol(SY(8, BTC))));
    produce_blocks(2);
+   //only owner can call 2
+   BOOST_REQUIRE_EQUAL(error("missing authority of btc.bos"),
+                       push_action(N(bob), N(setauditor), mvo()("sym_code", "BTC")("actn", "add")("auditor", "auditor.bank")));
+   //setpersonal should success,and check result
+   BOOST_REQUIRE_EQUAL(success(),
+                       push_action(N(btc.bos), N(setauditor), mvo()("sym_code", "BTC")("actn", "add")("auditor", "auditor.bank")));
+   auto aud = get_auditor("auditor.bank", "8,BTC");
+   REQUIRE_MATCHING_OBJECT(aud, mvo()("auditor", "auditor.bank"));
+}
+FC_LOG_AND_RETHROW()
 
-   // set correct issuer
-   setissuer(symbol(SY(8, BTC)).to_symbol_code(), N(issuer.bank));
+BOOST_FIXTURE_TEST_CASE(setgatherer_test, bos_pegtoken_tester)
+try
+{
+   create(symbol(SY(8, BTC)), N(btc.bos), "bitcoin");
+   BOOST_REQUIRE_EQUAL(error("missing authority of btc.bos"),
+                       push_action(N(bob), N(setgatherer), mvo()("sym_code", "BTC")("gatherer", "gather.bank")));
    produce_blocks(2);
-   auto token2 = setauditor(symbol(SY(8, BTC)).to_symbol_code(), "add", N(auditor.bank));
-   auto aud = get_auditor("8,BTC");
-   REQUIRE_MATCHING_OBJECT(aud, mvo()("auditor", N(auditor.bank)))
+   BOOST_REQUIRE_EQUAL(success(),
+                       push_action(N(btc.bos), N(setgatherer), mvo()("sym_code", "BTC")("gatherer", "gather.bank")));
+   auto gat = get_gatherer("gather.bank", "8,BTC");
+   // REQUIRE_MATCHING_OBJECT(gat, mvo()("gatherer", "gather.bank"));
+}
+FC_LOG_AND_RETHROW()
+
+BOOST_FIXTURE_TEST_CASE(setteller_test, bos_pegtoken_tester)
+try
+{
+   create(symbol(SY(8, BTC)), N(btc.bos), "bitcoin");
+   BOOST_REQUIRE_EQUAL(error("missing authority of btc.bos"),
+                       push_action(N(bob), N(setteller), mvo()("sym_code", "BTC")("teller", "teller.bank")));
+   produce_blocks(2);
+   BOOST_REQUIRE_EQUAL(success(),
+                       push_action(N(btc.bos), N(setteller), mvo()("sym_code", "BTC")("teller", "teller.bank")));
+   auto tel = get_teller("teller.bank", "8,BTC");
+   REQUIRE_MATCHING_OBJECT(tel, mvo()("teller", "teller.bank"));
+}
+FC_LOG_AND_RETHROW()
+
+BOOST_FIXTURE_TEST_CASE(setmanager_test, bos_pegtoken_tester)
+try
+{
+   create(symbol(SY(8, BTC)), N(btc.bos), "bitcoin");
+   BOOST_REQUIRE_EQUAL(error("missing authority of btc.bos"),
+                       push_action(N(bob), N(setmanager), mvo()("sym_code", "BTC")("manager", "manager.bank")));
+
+   BOOST_REQUIRE_EQUAL(error("missing authority of btc.bos"),
+                       push_action(N(btc.bos)), N(setmanager), mvo()("sym_code", "BTC")("manager", "f.bank")));
+   produce_blocks(2);
+   BOOST_REQUIRE_EQUAL(success(),
+                       push_action(N(btc.bos), N(setmanager), mvo()("sym_code", "BTC")("manager", "manager.bank")));
+   auto mgr = get_manager("manager.bank", "8,BTC");
+   REQUIRE_MATCHING_OBJECT(mgr, mvo()("manager", "manager.bank"));
 }
 FC_LOG_AND_RETHROW()
 
