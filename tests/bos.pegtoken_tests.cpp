@@ -252,7 +252,7 @@ try
                        push_action(N(bob), N(setmanager), mvo()("sym_code", "BTC")("manager", "manager.bank")));
 
    BOOST_REQUIRE_EQUAL(error("missing authority of btc.bos"),
-                       push_action(N(btc.bos)), N(setmanager), mvo()("sym_code", "BTC")("manager", "f.bank")));
+                       push_action(N(btc.bos), N(setmanager), mvo()("sym_code", "BTC")("manager", "f.bank")));
    produce_blocks(2);
    BOOST_REQUIRE_EQUAL(success(),
                        push_action(N(btc.bos), N(setmanager), mvo()("sym_code", "BTC")("manager", "manager.bank")));
