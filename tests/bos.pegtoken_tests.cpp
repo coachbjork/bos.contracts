@@ -261,20 +261,9 @@ try
 }
 FC_LOG_AND_RETHROW()
 
-BOOST_FIXTURE_TEST_CASE(setmanager_test, bos_pegtoken_tester)
+BOOST_FIXTURE_TEST_CASE(init_test, bos_pegtoken_tester)
 try
 {
-   create(symbol(SY(8, BTC)), N(btc.bos), "bitcoin");
-   BOOST_REQUIRE_EQUAL(error("missing authority of btc.bos"),
-                       push_action(N(bob), N(setmanager), mvo()("sym_code", "BTC")("manager", "manager.bank")));
-
-   BOOST_REQUIRE_EQUAL(error("missing authority of btc.bos"),
-                       push_action(N(btc.bos), N(setmanager), mvo()("sym_code", "BTC")("manager", "f.bank")));
-   produce_blocks(2);
-   BOOST_REQUIRE_EQUAL(success(),
-                       push_action(N(btc.bos), N(setmanager), mvo()("sym_code", "BTC")("manager", "manager.bank")));
-   auto mgr = get_manager("manager.bank", "8,BTC");
-   REQUIRE_MATCHING_OBJECT(mgr, mvo()("manager", "manager.bank"));
 }
 FC_LOG_AND_RETHROW()
 
