@@ -49,6 +49,14 @@ class bos_pegtoken_tester : public tester
       return base_tester::push_action(std::move(act), uint64_t(signer));
    }
 
+   // fc::variant get_nian(const string &symbolname)
+   // {
+   //    auto symb = eosio::chain::symbol::from_string(symbolname);
+   //    auto symbol_code = symb.to_symbol_code().value;
+   //    vector<char> data = get_row_by_account(N(btc.bos), symbol_code, N(niao), symbol_code);
+   //    return data.empty() ? fc::variant() : abi_ser.binary_to_variant("sscc_ts", data, abi_serializer_max_time);
+   // }
+
    fc::variant get_auditor(const name aud, const string &symbolname)
    {
       auto symb = eosio::chain::symbol::from_string(symbolname);
@@ -94,20 +102,27 @@ class bos_pegtoken_tester : public tester
       return data.empty() ? fc::variant() : abi_ser.binary_to_variant("symbol_ts", data, abi_serializer_max_time);
    }
 
-   fc::variant get_info_row(const string &symbolname)
+   fc::variant get_infos(const string &symbolname)
    {
       auto symb = eosio::chain::symbol::from_string(symbolname);
       auto symbol_code = symb.to_symbol_code().value;
-      vector<char> data = get_row_by_account(N(btc.bos), symbol_code, N(symbols), symbol_code);
+      vector<char> data = get_row_by_account(N(btc.bos), symbol_code, N(infos), symbol_code);
       return data.empty() ? fc::variant() : abi_ser.binary_to_variant("info_ts", data, abi_serializer_max_time);
    }
 
-   fc::variant get_nian(const string &symbolname)
+   name get_issuer(const string &symbolname)
    {
+      return get_infos(symbolname)["issuer"].as<name>();
+      // return data.empty() ? fc::variant() : abi_ser.binary_to_variant("info_ts", data, abi_serializer_max_time);
+   }
+
+   fc::variant get_issuer_mvo(const string &symbolname)
+   {
+      // return get_infos(symbolname)["issuer"];
       auto symb = eosio::chain::symbol::from_string(symbolname);
       auto symbol_code = symb.to_symbol_code().value;
-      vector<char> data = get_row_by_account(N(btc.bos), symbol_code, N(niao), symbol_code);
-      return data.empty() ? fc::variant() : abi_ser.binary_to_variant("sscc_ts", data, abi_serializer_max_time);
+      vector<char> data = get_row_by_account(N(btc.bos), symbol_code, N(infos), symbol_code);
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant("info_ts", data, abi_serializer_max_time)["issuer"];
    }
 
    fc::variant get_addrs(const name act, symbol_code sym)
@@ -138,26 +153,21 @@ class bos_pegtoken_tester : public tester
       return push_action(N(btc.bos), N(setissuer), mvo()("sym_code", sym_code)("issuer", issuer));
    }
 
-   action_result setauditor(symbol_code sym_code, string actn, name auditor)
-   {
-      return push_action(N(btc.bos), N(setauditor), mvo()("sym_code", sym_code)("actn", actn)("auditor", auditor));
-   }
-
    abi_serializer abi_ser;
 };
 
 BOOST_AUTO_TEST_SUITE(bos_pegtoken_tests)
 
-BOOST_FIXTURE_TEST_CASE(pp_tests, bos_pegtoken_tester)
-try
-{
+// BOOST_FIXTURE_TEST_CASE(pp_tests, bos_pegtoken_tester)
+// try
+// {
 
-   auto token = specialcret(N(alice), asset::from_string("1000.000 TKN"));
-   auto nian = get_nian("3,TKN");
-   REQUIRE_MATCHING_OBJECT(nian, mvo()("supply", "0.000 TKN")("max_supply", "1000.000 TKN")("issuer", "alice"));
-   produce_blocks(1);
-}
-FC_LOG_AND_RETHROW()
+//    auto token = specialcret(N(alice), asset::from_string("1000.000 TKN"));
+//    auto nian = get_nian("3,TKN");
+//    REQUIRE_MATCHING_OBJECT(nian, mvo()("supply", "0.000 TKN")("max_supply", "1000.000 TKN")("issuer", "alice"));
+//    produce_blocks(1);
+// }
+// FC_LOG_AND_RETHROW()
 
 BOOST_FIXTURE_TEST_CASE(create_tests, bos_pegtoken_tester)
 try
@@ -190,10 +200,16 @@ try
                        setissuer(symbol(SY(8, BTC)).to_symbol_code(), N(jacksonsmith)));
 
    // set correct issuer
-   setissuer(symbol(SY(8, BTC)).to_symbol_code(), N(issuer.bank));
-   // auto issuer_info = get_info_row("8,BTC");
+   // setissuer(symbol(SY(8, BTC)).to_symbol_code(), N(issuer.bank));
+   BOOST_REQUIRE_EQUAL(success(),
+                       push_action(N(btc.bos), N(setissuer), mvo()("sym_code", "BTC")("issuer", "issuer.bank")));
    // 如何对比table中的一个元素
-   // REQUIRE_MATCHING_OBJECT(issuer_info, mvo(), set_issuer(symbol(SY(8, BTC)).to_symbol_code(), N(issuer.bank)));
+   // name issr = get_issuer("8,BTC");
+   // REQUIRE_MATCHING_OBJECT(issr, N(issuer.bank));
+
+   auto issr_mvo = get_issuer_mvo("8,BTC");
+   // print("...");
+   // REQUIRE_MATCHING_OBJECT(issr_mvo, "issuer.bank");
 }
 FC_LOG_AND_RETHROW()
 
@@ -225,7 +241,8 @@ try
    produce_blocks(2);
    BOOST_REQUIRE_EQUAL(success(),
                        push_action(N(btc.bos), N(setgatherer), mvo()("sym_code", "BTC")("gatherer", "gather.bank")));
-   auto gat = get_gatherer("gather.bank", "8,BTC");
+   auto gat = get_gatherer(N("gather.bank"), "8,BTC");
+   //FIXME
    // REQUIRE_MATCHING_OBJECT(gat, mvo()("gatherer", "gather.bank"));
 }
 FC_LOG_AND_RETHROW()
@@ -251,8 +268,9 @@ try
    BOOST_REQUIRE_EQUAL(error("missing authority of btc.bos"),
                        push_action(N(bob), N(setmanager), mvo()("sym_code", "BTC")("manager", "manager.bank")));
 
-   BOOST_REQUIRE_EQUAL(error("missing authority of btc.bos"),
-                       push_action(N(btc.bos), N(setmanager), mvo()("sym_code", "BTC")("manager", "f.bank")));
+   BOOST_REQUIRE_EQUAL(wasm_assert_msg("invalid account issuer"),
+   BOOST_REQUIRE_EQUAL(error("invalid account manager"),
+                       push_action(N(btc.bos), N(setmanager), mvo()("sym_code", "BTC")("manager", "ff.bank")));
    produce_blocks(2);
    BOOST_REQUIRE_EQUAL(success(),
                        push_action(N(btc.bos), N(setmanager), mvo()("sym_code", "BTC")("manager", "manager.bank")));
@@ -264,12 +282,17 @@ FC_LOG_AND_RETHROW()
 BOOST_FIXTURE_TEST_CASE(init_test, bos_pegtoken_tester)
 try
 {
-}
-FC_LOG_AND_RETHROW()
-
-BOOST_FIXTURE_TEST_CASE(init_test, bos_pegtoken_tester)
-try
-{
+   create(symbol(SY(8, BTC)), N(btc.bos), "bitcoin");
+   BOOST_REQUIRE_EQUAL(success(),
+                       push_action(N(btc.bos), N(setissuer), mvo()("sym_code", "BTC")("issuer", "issuer.bank")));
+   BOOST_REQUIRE_EQUAL(success(),
+                       push_action(N(btc.bos), N(setauditor), mvo()("sym_code", "BTC")("actn", "add")("auditor", "auditor.bank")));
+   BOOST_REQUIRE_EQUAL(success(),
+                       push_action(N(btc.bos), N(setgatherer), mvo()("sym_code", "BTC")("gatherer", "gather.bank")));
+   BOOST_REQUIRE_EQUAL(success(),
+                       push_action(N(btc.bos), N(setteller), mvo()("sym_code", "BTC")("teller", "teller.bank")));
+   BOOST_REQUIRE_EQUAL(success(),
+                       push_action(N(btc.bos), N(setmanager), mvo()("sym_code", "BTC")("manager", "manager.bank")));
 }
 FC_LOG_AND_RETHROW()
 

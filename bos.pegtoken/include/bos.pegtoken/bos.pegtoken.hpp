@@ -60,6 +60,18 @@ public:
                       asset  maximum_supply);
 
     [[eosio::action]] void setissuer( symbol_code sym_code, name issuer );
+        
+    [[eosio::action]] void setauditor( symbol_code sym_code, string actn, name auditor );
+
+    [[eosio::action]] void setgatherer( symbol_code sym_code, name gatherer );
+
+    [[eosio::action]] void setteller( symbol_code sym_code, name teller );
+
+    [[eosio::action]] void setmanager( symbol_code sym_code, name manager );
+
+    [[eosio::action]] void setbrakeman( symbol_code sym_code, name brakeman );
+
+    [[eosio::action]] void setvip( symbol_code sym_code, string actn, name vip );
     
     [[eosio::action]] void setlimit( symbol_code sym_code, asset maximum_limit, asset minimum_limit, asset total_limit, uint64_t frequency_limit, uint64_t interval_limit );
 
@@ -102,18 +114,7 @@ public:
     [[eosio::action]] void lockall( symbol_code sym_code, name brakeman );
 
     [[eosio::action]] void unlockall( symbol_code sym_code, name brakeman );
-    
-    [[eosio::action]] void setauditor( symbol_code sym_code, string actn, name auditor );
 
-    [[eosio::action]] void setgatherer( symbol_code sym_code, name gatherer );
-
-    [[eosio::action]] void setteller( symbol_code sym_code, name teller );
-
-    [[eosio::action]] void setmanager( symbol_code sym_code, name manager );
-
-    [[eosio::action]] void setbrakeman( symbol_code sym_code, name brakeman );
-
-    [[eosio::action]] void setvip( symbol_code sym_code, string actn, name vip );
 
 private:
     bool getincheck( symbol_code sym_code );
