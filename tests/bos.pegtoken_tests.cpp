@@ -216,7 +216,7 @@ try
    produce_blocks(2);
    BOOST_REQUIRE_EQUAL(success(),
                        push_action(N(btc.bos), N(setgatherer), mvo()("sym_code", "BTC")("gatherer", "gather.bank")));
-   auto gat = get_gatherer(N("gather.bank"), "8,BTC");
+   auto gat = get_gatherer("gather.bank", "8,BTC");
    //FIXME
    REQUIRE_MATCHING_OBJECT(gat, mvo()("gatherer", "gather.bank"));
 }
