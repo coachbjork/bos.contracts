@@ -268,7 +268,7 @@ try
    BOOST_REQUIRE_EQUAL(error("missing authority of btc.bos"),
                        push_action(N(bob), N(setmanager), mvo()("sym_code", "BTC")("manager", "manager.bank")));
 
-   BOOST_REQUIRE_EQUAL(error("invalid account manager"),
+   BOOST_REQUIRE_EQUAL(wasm_assert_msg("invalid account manager"),
                        push_action(N(btc.bos), N(setmanager), mvo()("sym_code", "BTC")("manager", "ff.bank")));
    produce_blocks(2);
    BOOST_REQUIRE_EQUAL(success(),
