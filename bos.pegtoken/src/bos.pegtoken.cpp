@@ -5,28 +5,6 @@
 
 namespace eosio
 {
-
-void pegtoken::specialcret(name issuer,
-                           asset maximum_supply)
-{
-    require_auth(_self);
-
-    auto sym = maximum_supply.symbol;
-    eosio_assert(sym.is_valid(), "invalid symbol name");
-    eosio_assert(maximum_supply.is_valid(), "invalid supply");
-    eosio_assert(maximum_supply.amount > 0, "max-supply must be positive");
-
-    niao statstable(_self, sym.code().raw());
-    auto existing = statstable.find(sym.code().raw());
-    eosio_assert(existing == statstable.end(), "token with symbol already exists");
-
-    statstable.emplace(_self, [&](auto &s) {
-        s.supply.symbol = maximum_supply.symbol;
-        s.max_supply = maximum_supply;
-        s.issuer = issuer;
-    });
-}
-
 void pegtoken::create(symbol sym, name issuer, name address_style)
 {
     require_auth(get_self());
@@ -831,4 +809,4 @@ void pegtoken::unlockall(symbol_code sym_code, name brakeman)
 } // namespace eosio
 
 EOSIO_DISPATCH(eosio::pegtoken,
-               (specialcret)(create)(melt)(precast)(agreecast)(refusecast)(applyaddr)(resetaddress)(assignaddr)(pay)(ruin)(retreat)(confirmback)(denyback)(lockall)(unlockall)(setlimit)(setvip)(setviplimit)(setfee)(setvipfee)(setcheck)(setissuer)(setauditor)(setgatherer)(setteller)(setmanager)(setbrakeman));
+               (create)(melt)(precast)(agreecast)(refusecast)(applyaddr)(resetaddress)(assignaddr)(pay)(ruin)(retreat)(confirmback)(denyback)(lockall)(unlockall)(setlimit)(setvip)(setviplimit)(setfee)(setvipfee)(setcheck)(setissuer)(setauditor)(setgatherer)(setteller)(setmanager)(setbrakeman));

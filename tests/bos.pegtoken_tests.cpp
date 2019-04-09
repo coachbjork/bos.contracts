@@ -49,14 +49,6 @@ class bos_pegtoken_tester : public tester
       return base_tester::push_action(std::move(act), uint64_t(signer));
    }
 
-   // fc::variant get_nian(const string &symbolname)
-   // {
-   //    auto symb = eosio::chain::symbol::from_string(symbolname);
-   //    auto symbol_code = symb.to_symbol_code().value;
-   //    vector<char> data = get_row_by_account(N(btc.bos), symbol_code, N(niao), symbol_code);
-   //    return data.empty() ? fc::variant() : abi_ser.binary_to_variant("sscc_ts", data, abi_serializer_max_time);
-   // }
-
    fc::variant get_auditor(const name aud, const string &symbolname)
    {
       auto symb = eosio::chain::symbol::from_string(symbolname);
@@ -142,12 +134,6 @@ class bos_pegtoken_tester : public tester
       return push_action(N(btc.bos), N(create), mvo()("sym", sym)("issuer", issuer)("address_style", address_style));
    }
 
-   action_result specialcret(account_name issuer,
-                             asset maximum_supply)
-   {
-      return push_action(N(btc.bos), N(specialcret), mvo()("issuer", issuer)("maximum_supply", maximum_supply));
-   }
-
    action_result setissuer(symbol_code sym_code, name issuer)
    {
       return push_action(N(btc.bos), N(setissuer), mvo()("sym_code", sym_code)("issuer", issuer));
@@ -157,17 +143,6 @@ class bos_pegtoken_tester : public tester
 };
 
 BOOST_AUTO_TEST_SUITE(bos_pegtoken_tests)
-
-// BOOST_FIXTURE_TEST_CASE(pp_tests, bos_pegtoken_tester)
-// try
-// {
-
-//    auto token = specialcret(N(alice), asset::from_string("1000.000 TKN"));
-//    auto nian = get_nian("3,TKN");
-//    REQUIRE_MATCHING_OBJECT(nian, mvo()("supply", "0.000 TKN")("max_supply", "1000.000 TKN")("issuer", "alice"));
-//    produce_blocks(1);
-// }
-// FC_LOG_AND_RETHROW()
 
 BOOST_FIXTURE_TEST_CASE(create_tests, bos_pegtoken_tester)
 try
@@ -243,7 +218,7 @@ try
                        push_action(N(btc.bos), N(setgatherer), mvo()("sym_code", "BTC")("gatherer", "gather.bank")));
    auto gat = get_gatherer(N("gather.bank"), "8,BTC");
    //FIXME
-   // REQUIRE_MATCHING_OBJECT(gat, mvo()("gatherer", "gather.bank"));
+   REQUIRE_MATCHING_OBJECT(gat, mvo()("gatherer", "gather.bank"));
 }
 FC_LOG_AND_RETHROW()
 
