@@ -268,7 +268,6 @@ try
    BOOST_REQUIRE_EQUAL(error("missing authority of btc.bos"),
                        push_action(N(bob), N(setmanager), mvo()("sym_code", "BTC")("manager", "manager.bank")));
 
-   BOOST_REQUIRE_EQUAL(wasm_assert_msg("invalid account issuer"),
    BOOST_REQUIRE_EQUAL(error("invalid account manager"),
                        push_action(N(btc.bos), N(setmanager), mvo()("sym_code", "BTC")("manager", "ff.bank")));
    produce_blocks(2);
@@ -286,13 +285,13 @@ try
    BOOST_REQUIRE_EQUAL(success(),
                        push_action(N(btc.bos), N(setissuer), mvo()("sym_code", "BTC")("issuer", "issuer.bank")));
    BOOST_REQUIRE_EQUAL(success(),
-                       push_action(N(btc.bos), N(setauditor), mvo()("sym_code", "BTC")("actn", "add")("auditor", "auditor.bank")));
+                       push_action(N(issuer.bank), N(setauditor), mvo()("sym_code", "BTC")("actn", "add")("auditor", "auditor.bank")));
    BOOST_REQUIRE_EQUAL(success(),
-                       push_action(N(btc.bos), N(setgatherer), mvo()("sym_code", "BTC")("gatherer", "gather.bank")));
+                       push_action(N(issuer.bank), N(setgatherer), mvo()("sym_code", "BTC")("gatherer", "gather.bank")));
    BOOST_REQUIRE_EQUAL(success(),
-                       push_action(N(btc.bos), N(setteller), mvo()("sym_code", "BTC")("teller", "teller.bank")));
+                       push_action(N(issuer.bank), N(setteller), mvo()("sym_code", "BTC")("teller", "teller.bank")));
    BOOST_REQUIRE_EQUAL(success(),
-                       push_action(N(btc.bos), N(setmanager), mvo()("sym_code", "BTC")("manager", "manager.bank")));
+                       push_action(N(issuer.bank), N(setmanager), mvo()("sym_code", "BTC")("manager", "manager.bank")));
 }
 FC_LOG_AND_RETHROW()
 
