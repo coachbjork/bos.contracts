@@ -10,6 +10,9 @@ struct contracts {
 	static std::vector<uint8_t> msig_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../eosio.msig/eosio.msig.wasm"); }
 	static std::string          msig_wast() { return read_wast("${CMAKE_BINARY_DIR}/../eosio.msig/eosio.msig.wast"); }
 	static std::vector<char>    msig_abi() { return read_abi("${CMAKE_BINARY_DIR}/../eosio.msig/eosio.msig.abi"); }
+	static std::vector<uint8_t> wrap_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../eosio.wrap/eosio.wrap.wasm"); }
+	static std::string          wrap_wast() { return read_wast("${CMAKE_BINARY_DIR}/../eosio.wrap/eosio.wrap.wast"); }
+	static std::vector<char>    wrap_abi() { return read_abi("${CMAKE_BINARY_DIR}/../eosio.wrap/eosio.wrap.abi"); }
 	static std::vector<uint8_t> system_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../eosio.system/eosio.system.wasm"); }
 	static std::string          system_wast() { return read_wast("${CMAKE_BINARY_DIR}/../eosio.system/eosio.system.wast"); }
 	static std::vector<char>    system_abi() { return read_abi("${CMAKE_BINARY_DIR}/../eosio.system/eosio.system.abi"); }
