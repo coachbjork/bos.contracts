@@ -19,13 +19,12 @@ struct contracts {
 	static std::vector<uint8_t> system_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../eosio.system/eosio.system.wasm"); }
 	static std::string          system_wast() { return read_wast("${CMAKE_BINARY_DIR}/../eosio.system/eosio.system.wast"); }
 	static std::vector<char>    system_abi() { return read_abi("${CMAKE_BINARY_DIR}/../eosio.system/eosio.system.abi"); }
-	static std::vector<uint8_t> pegtoken_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../bos.pegtoken/bos.pegtoken.wasm"); }
-   static std::string          pegtoken_wast() { return read_wast("${CMAKE_BINARY_DIR}/../bos.pegtoken/bos.pegtoken.wast"); }
-   static std::vector<char>    pegtoken_abi() { return read_abi("${CMAKE_BINARY_DIR}/../bos.pegtoken/bos.pegtoken.abi"); }
 	static std::vector<uint8_t> personal_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../personal.bos/personal.bos.wasm"); }
    static std::string          personal_wast() { return read_wast("${CMAKE_BINARY_DIR}/../personal.bos/personal.bos.wast"); }
    static std::vector<char>    personal_abi() { return read_abi("${CMAKE_BINARY_DIR}/../personal.bos/personal.bos.abi"); }
-
+   static std::vector<uint8_t> pegtoken_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../bos.pegtoken/bos.pegtoken.wasm"); }
+   static std::string          pegtoken_wast() { return read_wast("${CMAKE_BINARY_DIR}/../bos.pegtoken/bos.pegtoken.wast"); }
+   static std::vector<char>    pegtoken_abi() { return read_abi("${CMAKE_BINARY_DIR}/../bos.pegtoken/bos.pegtoken.abi"); }
 
 	struct util {
       static std::vector<uint8_t> test_api_wasm() { return read_wasm("${CMAKE_SOURCE_DIR}/test_contracts/test_api.wasm"); }
