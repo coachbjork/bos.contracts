@@ -882,8 +882,8 @@ scope: 币种 如BTC、ETH
 ```
 name  owner  //普通用户账号。   主键    
 time_point_sec   last_time  //上次提币时间 
-uint64_t  frequency 
-asset   total 
+frequency // 24h之内用户的提币次数上限。如果本次提币距离上次提币超过24h，则重置次数
+total  // 24h之内用户的提币总额上限。如果本次提币距离上次提币超过24h，则重置总额
 time_point_sec       update_time    //统计时间
 ```
 
