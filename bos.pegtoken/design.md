@@ -797,6 +797,19 @@ asset   quantity  //需要生成的资产总数
 4. 根据quantity携带symbol确定scope。
 5. 查找accounts表，增加普通用户的balance值。
 
+### 二十七、notifymelt
+
+功能：传递销币记录id。
+权限：普通用户
+机制：严格锚定制
+参数：
+```
+uint64_t id  //序号。melts表记录的主键id。
+```
+
+大致流程：
+函数不需要实现任何逻辑，只需要传参melts表记录的主键id。
+
 # 第三部分：表结构设计
 
 ### 表 symbols
@@ -869,8 +882,8 @@ scope: 币种 如BTC、ETH
 ```
 name  owner  //普通用户账号。   主键    
 time_point_sec   last_time  //上次提币时间 
-uint64_t  frequency //上一个自然日零点开始到提币申请时的提币次数。每日零点之后重置
-asset   total //上一个自然日零点开始到提币申请时的提币总额。每日零点之后重置
+uint64_t  frequency 
+asset   total 
 time_point_sec       update_time    //统计时间
 ```
 

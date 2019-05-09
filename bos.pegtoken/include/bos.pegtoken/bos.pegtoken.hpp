@@ -503,8 +503,11 @@ bool pegtoken::getoutcheck(symbol_code sym_code)
 
 bool pegtoken::is_sym_equal_asset(symbol_code sym_code, asset quantity)
 {
-    symbol_code asset_symcode = quantity.symbol.code();
-    return asset_symcode == sym_code;
+    auto sym_raw = sym_code.raw();
+    auto info_table = infos(get_self(), sym_raw);
+    auto iter = info_table.find(sym_raw);
+    eosio_assert(iter != info_table.end(), "Can not find such sybmol.");
+    return iter->supply.symbol == quantity.symbol;
 }
 
 bool pegtoken::is_vip(symbol_code sym_code, name name)

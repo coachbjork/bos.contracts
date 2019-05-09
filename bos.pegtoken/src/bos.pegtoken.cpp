@@ -9,6 +9,7 @@ void pegtoken::create(symbol sym, name issuer, name address_style)
 {
     require_auth(get_self());
     ACCOUNT_CHECK(issuer);
+    eosio_assert(get_self() != issuer, "issuer can not by contract itself.");
     eosio_assert(sym.is_valid(), "invalid symbol.");
     eosio_assert(address_style == "bitcoin"_n || address_style == "ethereum"_n ||
                      address_style == "tether"_n || address_style == "other"_n,
@@ -61,6 +62,7 @@ void pegtoken::setissuer(symbol_code sym_code, name issuer)
 {
     require_auth(get_self());
     ACCOUNT_CHECK(issuer);
+    eosio_assert(get_self() != issuer, "issuer can not by contract itself.");
 
     auto sym_raw = sym_code.raw();
     auto info_table = infos(get_self(), sym_raw);
@@ -79,10 +81,9 @@ void pegtoken::setlimit(symbol_code sym_code, asset maximum_limit, asset minimum
     eosio_assert(is_sym_equal_asset(sym_code, maximum_limit), "sym_code is not same as maximum_limit symbol_code.");
     eosio_assert(is_sym_equal_asset(sym_code, minimum_limit), "sym_code is not same as minimum_limit symbol_code.");
     eosio_assert(is_sym_equal_asset(sym_code, total_limit), "sym_code is not same as total_limit symbol_code.");
-
     eosio_assert(minimum_limit.amount >= 0 && maximum_limit >= minimum_limit && total_limit >= maximum_limit,
                  "constrict mismatch: total_limit >= maximum_limit >= minimum_limit >= 0");
-    is_auth_manager(sym_code);
+
     auto limit_table = limits(get_self(), sym_code.raw());
     auto iter = limit_table.find(sym_code.raw());
     eosio_assert(iter != limit_table.end(), "Token with symbol not exists(limit)");
@@ -108,7 +109,6 @@ void pegtoken::setviplimit(symbol_code sym_code, name vip, asset maximum_limit, 
 
     auto vip_table = vips(get_self(), sym_raw);
     auto viplimit_table = viplimits(get_self(), sym_raw);
-    auto vipfee_table = vipfees(get_self(), sym_raw);
 
     auto iter_vip = vip_table.find(vip.value);
     eosio_assert(iter_vip != vip_table.end(), "vip not set.");
@@ -291,9 +291,6 @@ void pegtoken::refusecast(symbol_code sym_code, string to_address, name to_accou
     eosio_assert(quantity.amount > 0, "non-positive quantity");
 
     auto sym_raw = quantity.symbol.code().raw();
-    auto infos_tb = infos(get_self(), sym_raw);
-    auto iter_info = infos_tb.find(sym_raw);
-
     auto addr_table = addrs(get_self(), sym_raw);
     auto iter_addr = addr_table.find(to_account.value);
     eosio_assert(iter_addr != addr_table.end() && iter_addr->address == to_address, "invalid to_address");
@@ -329,7 +326,7 @@ void pegtoken::melt(name from_account, string to_address, asset quantity, string
     auto info_tb = infos(get_self(), sym_code.raw());
     auto info_iter = info_tb.find(sym_code.raw());
     eosio_assert(info_iter != info_tb.end(), "token not exist");
-    eosio_assert(getbalance(sym_code, from_account) > quantity, "the remaining balance of from_account should be more than quantity");
+    eosio_assert(getbalance(sym_code, from_account) >= quantity, "the remaining balance of from_account should be more than quantity");
     verify_address(info_iter->address_style, to_address);
     eosio::asset userfee, minlimit;
     double ratelimit;
@@ -473,9 +470,7 @@ void pegtoken::setteller(symbol_code sym_code, name teller)
 
     // Check if the address is already bound
     eosio_assert(addr_check(sym_code, teller), "this account has assigned to address already");
-    // Balance check
-    eosio_assert(balance_check(sym_code, teller), "teller`s balance should be 0");
-
+    
     auto teller_tb = tellers(get_self(), sym_code.raw());
     if (teller_tb.begin() == teller_tb.end())
     {
@@ -485,7 +480,11 @@ void pegtoken::setteller(symbol_code sym_code, name teller)
     }
     else
     {
-        teller_tb.erase(teller_tb.begin());
+        // Balance check
+        auto iter = teller_tb.begin();
+        eosio_assert(balance_check(sym_code, iter->teller), "Old teller`s balance should be 0");
+
+        teller_tb.erase(iter);
         teller_tb.emplace(get_self(), [&](auto &p) {
             p.teller = teller;
         });
@@ -552,10 +551,6 @@ void pegtoken::setvip(symbol_code sym_code, string actn, name vip)
     is_auth_role(sym_code, vip);
     ACCOUNT_CHECK(vip);
 
-    if (actn == "add")
-    {
-        eosio_assert(!is_vip(sym_code, vip), "the account has been set to vip for the sym");
-    }
     auto sym = symbol(sym_code, SYMBOL_PRECISION);
     auto vip_tb = vips(get_self(), sym_code.raw());
     auto viplimit_table = viplimits(get_self(), sym_code.raw());
@@ -563,35 +558,26 @@ void pegtoken::setvip(symbol_code sym_code, string actn, name vip)
     auto vip_iter = vip_tb.find(vip.value);
     if (actn == "add")
     {
-        if (vip_iter == vip_tb.end())
-        {
-            vip_tb.emplace(get_self(), [&](auto &p) {
-                p.vip = vip;
-                p.create_time = time_point_sec(now());
-            });
-            // Init viplimit and vipfee
-            viplimit_table.emplace(get_self(), [&](auto &p) {
-                p.owner = vip;
-                p.maximum_limit = eosio::asset(MAXIMUM_LIMIT, sym);
-                p.minimum_limit = eosio::asset(MINIMUM_LIMIT, sym);
-                p.total_limit = eosio::asset(TOTAL_LIMIT, sym);
-                ;
-                p.frequency_limit = FREQUENCY_LIMIT;
-                p.interval_limit = INTERVAL_LIMIT;
-            });
-            vipfee_table.emplace(get_self(), [&](auto &p) {
-                p.owner = vip;
-                p.service_fee_rate = SERVICE_FEE_RATE;
-                p.min_service_fee = eosio::asset(MIN_SERVICE_FEE, sym);
-                p.miner_fee = eosio::asset(MINER_FEE, sym);
-            });
-        }
-        else
-        {
-            vip_tb.modify(vip_iter, same_payer, [&](auto &vp) {
-                vp.vip = vip;
-            });
-        }
+        eosio_assert(vip_iter == vip_tb.end(), "the account has been set to vip for the sym");
+        vip_tb.emplace(get_self(), [&](auto &p) {
+            p.vip = vip;
+            p.create_time = time_point_sec(now());
+        });
+        // Init viplimit and vipfee
+        viplimit_table.emplace(get_self(), [&](auto &p) {
+            p.owner = vip;
+            p.maximum_limit = eosio::asset(MAXIMUM_LIMIT, sym);
+            p.minimum_limit = eosio::asset(MINIMUM_LIMIT, sym);
+            p.total_limit = eosio::asset(TOTAL_LIMIT, sym);
+            p.frequency_limit = FREQUENCY_LIMIT;
+            p.interval_limit = INTERVAL_LIMIT;
+        });
+        vipfee_table.emplace(get_self(), [&](auto &p) {
+            p.owner = vip;
+            p.service_fee_rate = SERVICE_FEE_RATE;
+            p.min_service_fee = eosio::asset(MIN_SERVICE_FEE, sym);
+            p.miner_fee = eosio::asset(MINER_FEE, sym);
+        });
     }
     else if (actn == "remove")
     {
@@ -710,7 +696,7 @@ void pegtoken::retreat(name to, asset quantity)
 {
     auto sym_code = quantity.symbol.code();
     eosio_assert(is_locked(sym_code), "The token is locked");
-    eosio_assert(quantity.amount > 0, "The quantity to ruin is less or equal to 0");
+    eosio_assert(quantity.amount > 0, "The quantity to retreat is less or equal to 0");
     is_auth_teller(sym_code);
     add_balance(to, quantity, get_self());
 }
