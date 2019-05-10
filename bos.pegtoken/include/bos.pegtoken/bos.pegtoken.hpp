@@ -143,7 +143,6 @@ class[[eosio::contract("bos.pegtoken")]] pegtoken : public contract
     bool addr_check(symbol_code sym_code, name user);
 
     asset getbalance(symbol_code sym_code, name user);
-    asset calculate_service_fee(asset sum, double service_fee_rate, asset min_service_fee);
 
     struct [[eosio::table]] symbol_ts
     {
@@ -434,20 +433,6 @@ void pegtoken::add_balance(name owner, asset value, name ram_payer)
         acct.modify(to, same_payer, [&](auto &p) {
             p.balance += value;
         });
-    }
-}
-
-asset pegtoken::calculate_service_fee(asset sum, double service_fee_rate, asset min_service_fee)
-{
-    asset actual_service_fee = sum * service_fee_rate;
-
-    if (actual_service_fee.amount < min_service_fee.amount)
-    {
-        return min_service_fee;
-    }
-    else
-    {
-        return actual_service_fee;
     }
 }
 
