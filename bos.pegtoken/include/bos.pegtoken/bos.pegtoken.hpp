@@ -60,9 +60,6 @@ class[[eosio::contract("bos.pegtoken")]] pegtoken : public contract
 
     [[eosio::action]] void create(symbol sym, name issuer, name address_style);
 
-    [[eosio::action]] void specialcret(name issuer,
-                                       asset maximum_supply);
-
     [[eosio::action]] void setissuer(symbol_code sym_code, name issuer);
 
     [[eosio::action]] void setauditor(symbol_code sym_code, string actn, name auditor);
@@ -123,7 +120,6 @@ class[[eosio::contract("bos.pegtoken")]] pegtoken : public contract
     bool getincheck(symbol_code sym_code);
     bool getoutcheck(symbol_code sym_code);
     void verify_address(name style, string address);
-    void verify_txid(name style, string txid); //TODO
     void add_balance(name owner, asset value, name ram_payer);
     void sub_balance(name owner, asset value);
     bool is_sym_equal_asset(symbol_code sym_code, asset quantity);
@@ -148,16 +144,6 @@ class[[eosio::contract("bos.pegtoken")]] pegtoken : public contract
 
     asset getbalance(symbol_code sym_code, name user);
     asset calculate_service_fee(asset sum, double service_fee_rate, asset min_service_fee);
-
-    struct [[eosio::table]] sscc_ts
-    {
-        asset supply;
-        asset max_supply;
-        name issuer;
-
-        uint64_t primary_key() const { return supply.symbol.code().raw(); }
-    };
-    //  typedef eosio::multi_index< "niao"_n, sscc_ts > niao;
 
     struct [[eosio::table]] symbol_ts
     {
@@ -358,7 +344,6 @@ class[[eosio::contract("bos.pegtoken")]] pegtoken : public contract
         uint64_t primary_key() const { return brakeman.value; }
     };
 
-    using niao = eosio::multi_index<"niao"_n, sscc_ts>;
     using symbols = eosio::multi_index<"symbols"_n, symbol_ts>;
     using checks = eosio::multi_index<"checks"_n, check_ts>;
     using addrs = eosio::multi_index<"addrs"_n, addr_ts,
