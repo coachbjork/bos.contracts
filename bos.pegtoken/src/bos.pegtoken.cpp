@@ -156,14 +156,12 @@ void pegtoken::setvipfee(symbol_code sym_code, name vip, double service_fee_rate
 
     auto iter_vip = vip_table.find(vip.value);
     eosio_assert(iter_vip != vip_table.end(), "not in the VIP table");
-    if (iter_vip != vip_table.end())
-    {
-        vipfee_table.modify(vipfee_table.find(vip.value), same_payer, [&](auto &p) {
-            p.service_fee_rate = service_fee_rate;
-            p.min_service_fee = min_service_fee;
-            p.miner_fee = miner_fee;
-        });
-    }
+    
+    vipfee_table.modify(vipfee_table.find(vip.value), same_payer, [&](auto &p) {
+        p.service_fee_rate = service_fee_rate;
+        p.min_service_fee = min_service_fee;
+        p.miner_fee = miner_fee;
+    });
 }
 
 void pegtoken::setcheck(symbol_code sym_code, bool in_check, bool out_check)
