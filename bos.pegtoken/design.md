@@ -1009,7 +1009,6 @@ asset    minimum_limit //单次最小换币金额
 asset    total_limit //单日累计换币总额
 uint64_t frequency_limit   //单日累计换币次数
 uint64_t interval_limit  //两次换币间隔秒数
-uint64_t reset_limit //两次重置绑定地址的秒数
 ```
 
 ```
@@ -1068,7 +1067,6 @@ asset    min_limit //单次最小换币金额
 asset    total_limit //单日累计换币总额
 uint64_t frequency_limit   //单日累计换币次数
 uint64_t interval_limit  //两次换币间隔秒数
-uint64_t reset_limit //两次重置绑定地址的秒数
 ```
 
 ### 表 fees [币种]

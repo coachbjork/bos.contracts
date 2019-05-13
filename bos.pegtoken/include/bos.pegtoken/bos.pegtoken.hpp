@@ -262,7 +262,6 @@ class[[eosio::contract("bos.pegtoken")]] pegtoken : public contract
         asset total_limit;
         uint64_t frequency_limit;
         uint64_t interval_limit; // Two tokens exchange intervals
-        uint64_t reset_limit;    // Limit of reset the binding address
 
         uint64_t primary_key() const { return owner.value; }
     };
@@ -294,7 +293,6 @@ class[[eosio::contract("bos.pegtoken")]] pegtoken : public contract
         asset total_limit;
         uint64_t frequency_limit;
         uint64_t interval_limit;
-        uint64_t reset_limit;
 
         uint64_t primary_key() const { return maximum_limit.symbol.code().raw(); }
     };

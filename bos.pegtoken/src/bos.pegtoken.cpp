@@ -42,10 +42,8 @@ void pegtoken::create(symbol sym, name issuer, name address_style)
         p.maximum_limit = eosio::asset(MAXIMUM_LIMIT, sym);
         p.minimum_limit = eosio::asset(MINIMUM_LIMIT, sym);
         p.total_limit = eosio::asset(TOTAL_LIMIT, sym);
-
         p.frequency_limit = FREQUENCY_LIMIT;
         p.interval_limit = INTERVAL_LIMIT;
-        p.reset_limit = 30 * ONE_DAY;
     });
 
     // Init fees.
