@@ -627,7 +627,7 @@ void pegtoken::vip_withdraw_check(symbol_code sym_code, asset quantity, name acc
     }
     else
     {
-        eosio_assert(now_time - statistic_iter->last_time >= seconds(vlim_val.interval_limit),
+        eosio_assert(now_time - statistic_iter->update_time >= seconds(vlim_val.interval_limit),
                      "From now is less than interval_limit");
     }
     auto statistic_val = statistics_tb.get(account.value, "No such account in statistics table");
@@ -671,7 +671,7 @@ void pegtoken::withdraw_check(symbol_code sym_code, asset quantity, name account
     }
     else
     {
-        eosio_assert(now_time - statistic_iter->last_time >= seconds(lim_val.interval_limit),
+        eosio_assert(now_time - statistic_iter->update_time >= seconds(lim_val.interval_limit),
                      "From now is less than interval_limit");
     }
     auto statistic_val = statistics_tb.get(account.value, "No such account in statistics table");
