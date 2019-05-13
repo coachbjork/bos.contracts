@@ -394,6 +394,7 @@ void pegtoken::melt(name from_account, string to_address, asset quantity, string
         {
             sts.frequency = 1;
             sts.total = quantity;
+            sts.last_time = now_time;
         }
         else
         {
@@ -401,7 +402,6 @@ void pegtoken::melt(name from_account, string to_address, asset quantity, string
             sts.total += quantity;
         }
         sts.update_time = now_time;
-        sts.last_time = now_time;
     });
 }
 
