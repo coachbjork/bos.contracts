@@ -1226,7 +1226,7 @@ cleos get table btc.bos BTC auditors
 cleos get table eth.bos ETH auditors
 ```
 
-### 表 gathers
+### 表 gatherers
 
 介绍：承兑商的收费员, 每个收费员一条记录。
 
@@ -1239,8 +1239,8 @@ name  gatherer  //收费员账号。主键
 ```
 
 ```
-cleos get table btc.bos BTC gathers
-cleos get table eth.bos ETH gathers
+cleos get table btc.bos BTC gatherers
+cleos get table eth.bos ETH gatherers
 ```
 
 ### 表 brakemans
