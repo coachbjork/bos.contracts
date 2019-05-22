@@ -790,7 +790,34 @@ void pegtoken::unlockall(symbol_code sym_code, name brakeman)
     eosio_assert(iter->active == false, "this token is not being locked");
     infos_tb.modify(iter, same_payer, [&](auto &p) { p.active = true; });
 }
+
+void pegtoken::transfer( name from, name to, asset quantity, string  memo )
+{
+    auto sym_code = quantity.symbol.code();
+    eosio_assert(is_locked(sym_code), "The token is locked");
+    eosio_assert( from != to, "cannot transfer to self" );
+    require_auth( from );
+    eosio_assert( is_account( to ), "to account does not exist");
+
+    auto sym_raw = sym_code.raw();
+    auto info_table = infos(get_self(), sym_raw);
+    const auto& info = info_table.get(sym_raw);
+
+    require_recipient( from );
+    require_recipient( to );
+
+    eosio_assert( quantity.is_valid(), "invalid quantity" );
+    eosio_assert( quantity.amount > 0, "must transfer positive quantity" );
+    eosio_assert( quantity.symbol == info.supply.symbol, "symbol precision mismatch" );
+    eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
+
+    auto payer = has_auth( to ) ? to : from;
+
+    sub_balance( from, quantity );
+    add_balance( to, quantity, payer );
+}
+
 } // namespace eosio
 
 EOSIO_DISPATCH(eosio::pegtoken,
-               (create)(melt)(precast)(agreecast)(refusecast)(applyaddr)(resetaddress)(assignaddr)(pay)(ruin)(retreat)(confirmback)(denyback)(lockall)(unlockall)(setlimit)(setvip)(setviplimit)(setfee)(setvipfee)(setcheck)(setissuer)(setauditor)(setgatherer)(setteller)(setmanager)(setbrakeman));
+               (create)(melt)(transfer)(precast)(agreecast)(refusecast)(applyaddr)(resetaddress)(assignaddr)(pay)(ruin)(retreat)(confirmback)(denyback)(lockall)(unlockall)(setlimit)(setvip)(setviplimit)(setfee)(setvipfee)(setcheck)(setissuer)(setauditor)(setgatherer)(setteller)(setmanager)(setbrakeman));

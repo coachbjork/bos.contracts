@@ -116,6 +116,8 @@ class[[eosio::contract("bos.pegtoken")]] pegtoken : public contract
 
     [[eosio::action]] void unlockall(symbol_code sym_code, name brakeman);
 
+    [[eosio::action]] void transfer( name from, name to, asset quantity, string memo );
+
   private:
     bool getincheck(symbol_code sym_code);
     bool getoutcheck(symbol_code sym_code);
@@ -410,7 +412,7 @@ void pegtoken::sub_balance(name owner, asset value)
     }
     else
     {
-        acct.modify(from, same_payer, [&](auto &p) {
+        acct.modify(from, owner, [&](auto &p) {
             p.balance -= value;
         });
     }
