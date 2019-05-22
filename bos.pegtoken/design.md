@@ -38,8 +38,8 @@ ETH部署者是eth.bos;
 合约部署账号:  usdt.bos btc.bos  eth.bos
 承兑商(issuer)账号:   boshuobipool
 出纳员（teller）的账号:
-	BTC:  btcbtcbtcbtc
-	ETH:  ethethetheth
+	BTC: btcbtcbtcbtc
+	ETH: ethethetheth
   USDT: usdtusdtusdt
 
 审核员（auditor）账号： huobiauditor, auditorhuobi
@@ -111,7 +111,7 @@ applyaddr：申请地址绑定
 ```
 
 
-# 第二部分：接口设计
+# 第三部分：接口设计
 
 ### 一、 create【BP 多签】
 
@@ -860,7 +860,7 @@ asset   quantity  //需要生成的资产总数
 4. 根据quantity携带symbol确定scope。
 5. 查找accounts表，增加普通用户的balance值。
 
-### 二十七、notifymelt
+### 二十八、notifymelt
 
 功能：传递销币记录id    
 权限：普通用户(user)  
@@ -873,7 +873,7 @@ uint64_t id  //序号，melts表记录的主键id。
 大致流程：
 函数不需要实现任何逻辑，只需要传参melts表记录的主键id。
 
-### 二十八、transfer
+### 二十九、transfer
 
 功能：转账。用户铸币成功后，可以使用转账功能在BOS全网进行资产转移，比如去dapp消费   
 权限：普通用户(user)    
@@ -898,8 +898,7 @@ string  memo      //备注
 
 ```
 cleos push action btc.bos transfer '[ "huobihuaping", "huobiliqiang", "0.90000000 BTC", "BTC转账" ]' -p huobihuaping
-cleos push action eth.bos transfer '[ "huobihuaping", "huobiliqiang
-", "0.90000000 ETH", "ETH转账" ]' -p huobihuaping
+cleos push action eth.bos transfer '[ "huobihuaping", "huobiliqiang", "0.90000000 ETH", "ETH转账" ]' -p huobihuaping
 cleos push action usdt.bos transfer '[ "huobihuaping", "huobiliqiang", "0.90000000 USDT", "USDT转账" ]' -p huobihuaping
 ```
 
