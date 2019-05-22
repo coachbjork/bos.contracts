@@ -7,45 +7,117 @@
 为表述方便，定义一些名词：
 
 ```
-角色：合约部署者（deployer）、承兑商(issuer)、承兑商相应币种承兑人（acceptor）、承兑商审核员（auditor）、普通用户(user)
+角色：合约部署者（deployer）、承兑商(issuer)、承兑商相应币种管理员(manager)、承兑商相应币种出纳员（teller）、承兑商审核员（auditor）、收费员（gatherer）、制动员（brakeman）、普通用户(user)
 
 合约部署者在主网启动时部署该合约。
 USDT部署者是usdt.bos;
 BTC部署者是btc.bos;
 ETH部署者是eth.bos;
 
-承兑商由BP多签创建，每种币可以有多个承兑商。但在BOS链上的币名不能相同。
+承兑商(issuer)：由BP多签创建，每种币可以有多个承兑商。但在BOS链上的币名不能相同。
 举例：BTC在BOS链上的相应的币名可以为BTC、BBTC、BOSBTC等。
 一个承兑商可以承兑多种币，一种币只能用一个承兑商。
 
-每个承兑商相应币种的承兑人有且只有一个。
-承兑人的功能：（a）给用户转账（b）接收用户转账
+管理员(manager)：由承兑商(issuer)指定。配置限额、费率等参数。
+每个承兑商相应币种的管理员有且只有一个。多个币种的管理员可以相同。
 
+出纳员(teller)：由承兑商(issuer)指定。负责与普通用户的往来。即：（a）给用户铸币（b）分配地址 (c) 销币成功/失败的反馈。
+每个承兑商相应币种的出纳员有且只有一个。多个币种的出纳员可以相同。
+
+审核员(auditor)：由承兑商(issuer)指定。审核出纳员的有风险的操作。即：（a）同意或拒绝预铸币/预销币。
 每个承兑商的审核员至少一个、可以多个。
-审核员的功能：（a）同意或拒绝大额提币 （b）提币失败时, 将币退回用户账户。
 
-充币：在BOS链上，承兑商的承兑人给普通用户转账
+收费员(gatherer)：由承兑商(issuer)指定。保管业务开展过程中所收取的费用。
+每个承兑商相应币种的收费员有且只有一个。多个币种的收费员可以相同。
 
-提币：在BOS链上，普通用户给承兑商的承兑人转账
+制动员(brakeman)：由承兑商(issuer)指定。应对紧急情况。包括：（a）紧急状态下，停止整个系统；（b）危机解除后，恢复整个系统。
+每个承兑商相应币种的制动员有且只有一个。多个币种的制动员可以相同。
+
+普通用户(user)：社区的广大用户。管理员可以将某些普通用户设置为VIP并且分级管理。
 
 合约部署账号:  usdt.bos btc.bos  eth.bos
 承兑商(issuer)账号:   boshuobipool
-承兑商相应币种承兑人（acceptor）的账号:
+出纳员（teller）的账号:
 	BTC:  btcbtcbtcbtc
 	ETH:  ethethetheth
-    USDT: usdtusdtusdt
+  USDT: usdtusdtusdt
 
-承兑商审核员（auditor）账号： huobiauditor, auditorhuobi
-承兑商合作方(partner)账号:  huobipartner, partnerhuobi
+审核员（auditor）账号： huobiauditor, auditorhuobi
+管理员(manager)的账号: huobimanager
+收费员（gatherer）的账号：hbhbgatherer
+制动员（brakeman）的账号：hbhbbrakeman
+
+铸币: 在BOS链上，承兑商的出纳员给普通用户发行币。
+销币：在BOS链上，普通用户回收自己的币。
+转账：在BOS链上，普通用户转账。
 ```
+
+# 第二部分：合约简介
+承兑商控制的相关账户，大致分为以下几类：
+```
+承兑商issuer：create发币时指定，可以调用超级设置类方法
+承兑商管理员manager：由issuer设置，可以调用设置类方法
+承兑商出纳员teller：由issuer设置，可以调用操作类方法
+承兑商审核员auditor：由issuer设置，可以调用审核类方法
+承兑商收费员gatherer：由issuer设置，接收手续费账户
+承兑商制动员brakeman：由issuer设置，锁定类方法
+```
+
+承兑商合约，与我们相关的方法，大致分为以下几大类：
+超级设置类 (issuer)
+```
+setauditor：设置审核员auditor
+setgatherer：设置收费员gatherer
+setteller：设置出纳员teller
+setmanager：设置管理员manager
+setbrakeman：设置制动员brakeman
+```
+
+设置类 (manager)
+```
+setlimit：设置每个账户最大最小兑换额、单日兑换次数、单日累计兑换额度
+setfee：设置费率、最大最小手续费
+setvip：设置vip用户
+setviplimit：设置vip账户最大最小兑换额、单日兑换次数、单日累计兑换额度
+setvipfee：设置vip用户费用
+setcheck：设置出/入金是否需要审核，需要审核的只能采用pre-audit模式发起铸币销币
+resetaddress：承兑商重置用户地址关系，用于私钥丢失的紧急情况
+```
+
+操作类 (teller)
+```
+precast：承兑商预铸币
+assignaddr：分配地址
+confirmback：销币成功的反馈
+denyback：销币失败后，将销毁的币重新铸回用户账户（手续费不退）
+```
+
+审核类 (auditor)
+```
+agreecast：同意预铸币 & 铸币到某个账户
+refusecast：拒绝预铸币
+```
+
+锁定类 (brakeman)
+```
+lockall：一键禁用precast、agreecast、refusecast、melt、denyback、transfer等涉及金额变动的方法。接口文档中的关键词：”判断是否已经锁定，如果已锁定，则报错并提示”，涉及关键词的方法都要被锁住
+unlockall：一键解锁
+```
+
+普通用户 (user)
+```
+melt：销币，将fee转移到收费员账户，销毁剩余币
+applyaddr：申请地址绑定
+```
+
 
 # 第二部分：接口设计
 
 ### 一、 create【BP 多签】
 
-功能： 创建承兑商及币种。
-承兑商账号不能是合约部署账号，如 btc.bos。
-权限:   BP 多签
+功能： 创建承兑商及币种。   
+承兑商账号不能是合约部署账号，如 btc.bos。   
+权限: BP多签  
 
 ```
 symbol  sym  //币名。如BTC、ETH、USDT   包含精度
@@ -74,11 +146,10 @@ cleos push action usdt.bos create '["8,USDT", "boshuobipool",  "tether"]' -p usd
 
 ### 二、setissuer【BP多签】
 
-功能： 设置承兑商。 承兑商账号不能是合约部署账号，如btc.bos。
-权限:   BP多签
-版本：1和2
-机制：预发行制和严格锚定制
-参数：
+功能: 设置承兑商。 承兑商账号不能是合约部署账号，如btc.bos。  
+权限: BP多签  
+机制：预发行制和严格锚定制  
+参数：  
 
 ```
 symbol_code  sym_code  //币名。如BTC、ETH、USDT
@@ -95,17 +166,17 @@ cleos push action eth.bos setissuer '["ETH", "boshuobipool"]' -p eth.bos
 cleos push action usdt.bos setissuer '["USDT", "boshuobipool"]' -p usdt.bos
 ```
 
-### 三、setauditor 
+### 三、setauditor
 
-功能：承兑商添加或者删除自己的审核员。可以设置多个审核员。
-权限：承兑商
-机制：预发行制和严格锚定制
+功能：承兑商添加或者删除自己的审核员。可以设置多个审核员。  
+权限：承兑商(issuer)  
+机制：预发行制和严格锚定制  
 参数：
 
 ```
 symbol_code sym_code //币名
-string  actn          //动作：添加或删除     字符串为 add 或 remove
-name    auditor     //承兑商的某个审核员账户
+string  actn         //动作：添加或删除     字符串为 add 或 remove
+name    auditor      //承兑商的某个审核员账户
 ```
 
 大致流程：
@@ -124,9 +195,9 @@ cleos push action btc.bos setauditor '["BTC","remove","huobiauditor"]' -p boshuo
 
 ### 四、setgatherer
 
-功能：承兑商添加或者删除自己的收费员。有且只有一个收费员。
-权限：承兑商
-机制：严格锚定制
+功能：承兑商添加或者删除自己的收费员。有且只有一个收费员。  
+权限：承兑商(issuer)  
+机制：严格锚定制  
 参数：
 
 ```
@@ -149,9 +220,9 @@ cleos push action btc.bos setgatherer '["BTC","huobigatherer"]' -p boshuobipool
 
 ### 五、setteller
 
-功能：承兑商添加或者修改相应币种的出纳员。必须设置且只能设置一个出纳员。
-权限：承兑商
-机制：严格锚定制
+功能：承兑商添加或者修改相应币种的出纳员。必须设置且只能设置一个出纳员。  
+权限：承兑商(issuer)  
+机制：严格锚定制  
 参数：
 
 ```
@@ -176,9 +247,9 @@ cleos push action usdt.bos setteller '["USDT","usdtusdtusdt"]' -p boshuobipool
 
 ### 六、setmanager
 
-功能：承兑商添加或者删除自己的管理员。必须设置且只能设置一个管理员。
-权限：承兑商
-机制：严格锚定制
+功能：承兑商添加或者删除自己的管理员。必须设置且只能设置一个管理员。  
+权限：承兑商(issuer)  
+机制：严格锚定制  
 参数：
 
 ```
@@ -201,9 +272,9 @@ cleos push action btc.bos setmanager '["BTC","huobimanager"]' -p boshuobipool
 
 ### 七、setbrakeman
 
-功能：承兑商添加或者删除自己的制动员。必须设置且只能设置一个制动员。
-权限：承兑商
-机制：严格锚定制
+功能：承兑商添加或者删除自己的制动员。必须设置且只能设置一个制动员。  
+权限：承兑商(issuer)  
+机制：严格锚定制  
 参数：
 
 ```
@@ -226,26 +297,26 @@ cleos push action btc.bos setbrakeman '["BTC","hbhbbrakeman"]' -p boshuobipool
 
 ### 八、 setlimit
 
-功能：承兑商设置限额。
-包括：单次最大换币金额、单次最小换币金额、单日累计换币限额、单日累计换币次数、两次换币间隔
-权限：管理员
-机制：严格锚定制
+功能：承兑商设置限额。  
+包括：单次最大换币金额、单次最小换币金额、单日累计换币限额、单日累计换币次数、两次换币间隔  
+权限：管理员(manager)  
+机制：严格锚定制  
 参数：
 
 ```
-symbol_code  sym_code  //币名。如BTC、ETH、USDT
-asset   maximum_limit  //单次最大换币金额。每个账号每次换币金额大于此数, 承兑商不换币。默认值为：BTC 1   ETH 1  USDT 1
-asset   minimum_limit  //单次最小换币金额。每个账号每次换币金额小于此数，承兑商不换币。默认值为：BTC 0.00005  ETH 0.00005 USDT 0.00005
-asset   total_limit  //单日累计换币限额。每个账号每日换币总额大于此数，承兑商不换币。默认值为：BTC 10 ETH 10  USDT 10
-uint64_t frequency_limit   //单日累计换币次数。 每个账号每日换币次数大于此数，则承兑商不换币。默认值为：BTC 3 ETH 3  USDT 3
-uint64_t interval_limit //两次换币的间隔秒数。每个账号两次换币间隔秒数小于此数，承兑商不换币。默认值为：
+symbol_code  sym_code     //币名。如BTC、ETH、USDT
+asset   maximum_limit     //单次最大换币金额。每个账号每次换币金额大于此数, 承兑商不换币。默认值为：BTC 1   ETH 1  USDT 1
+asset   minimum_limit     //单次最小换币金额。每个账号每次换币金额小于此数，承兑商不换币。默认值为：BTC 0.00005  ETH 0.00005 USDT 0.00005
+asset   total_limit       //单日累计换币限额。每个账号每日换币总额大于此数，承兑商不换币。默认值为：BTC 10 ETH 10  USDT 10
+uint64_t frequency_limit  //单日累计换币次数。 每个账号每日换币次数大于此数，则承兑商不换币。默认值为：BTC 3 ETH 3  USDT 3
+uint64_t interval_limit   //两次换币的间隔秒数。每个账号两次换币间隔秒数小于此数，承兑商不换币。
 ```
 
 大致流程：
 
-1. 校验权限。
-2. 判断所有的asset是否与sym_code为同一种币，若不是，则报错。
-3. 根据sym_code，增加或者修改limits表的maximum_limit、minimum_limit、total_limit、frequency_limit、interval_limit字段。若为增加，则其他字段为0。
+1. 校验权限。  
+2. 判断所有的asset是否与sym_code为同一种币，若不是，则报错。  
+3. 根据sym_code，增加或者修改limits表的maximum_limit、minimum_limit、total_limit、frequency_limit、interval_limit字段。若为增加，则其他字段为0。  
 
 ```
 cleos push action btc.bos setlimit '["BTC", "1.00000000 BTC","0.00005000 BTC","10.00000000 BTC","3","300"]' -p huobimanager
@@ -255,16 +326,16 @@ cleos push action usdt.bos setlimit '["USDT","1.00000000 USDT","0.00005000 USDT"
 
 ### 九、setfee
 
-功能：承兑商设置服务费。提币/销币时收取，充币/铸币时不收取。按提币/销币金额收取相应费率的手续费。有最低收费。
-权限：管理员
-机制：严格锚定制
+功能：承兑商设置服务费。销币时收取，铸币时不收取。按销币金额收取相应费率的手续费。有最低收费。  
+权限：管理员(manager)  
+机制：严格锚定制  
 参数：
 
 ```
-symbol_code  sym_code  //币名。如BTC、ETH、USDT
-double  service_fee_rate     //服务费率   默认0.001 （千分之一）
+symbol_code  sym_code       //币名。如BTC、ETH、USDT
+double  service_fee_rate    //服务费率   默认0.001 （千分之一）
 asset   min_service_fee     //服务费最低收费  默认0.0005
-asset   miner_fee  //矿工费  默认 BTC 0.00004 ETH 0.00004
+asset   miner_fee           //矿工费  默认 BTC 0.00004 ETH 0.00004
 ```
 
 大致流程：
@@ -275,33 +346,33 @@ asset   miner_fee  //矿工费  默认 BTC 0.00004 ETH 0.00004
 
 ```
 cleos push action btc.bos setfee '["BTC", "0.001","0.00005000 BTC", "0.00004000 BTC"]' -p huobimanager
-cleos push action eth.bos setfee 
+cleos push action eth.bos setfee
 '["ETH","0.001","0.00005000 ETH", "0.00004000 ETH"]' -p huobimanager
 cleos push action usdt.bos setfee '["USDT","0.001","0.00005000 USDT", "0.00004000 USDT"]' -p huobimanager
 ```
 
 ### 十、setvip
 
-功能：承兑商添加或者修改相应币种的某个用户为vip用户。
-权限：管理员
-机制：严格锚定制
+功能：承兑商添加或者修改相应币种的某个用户为vip用户。   
+权限：管理员(manager)  
+机制：严格锚定制  
 参数：
 
 ```
-symbol_code sym_code //币名
-string  actn          //动作：添加或删除     字符串为 add 或 remove
-name    vip     //vip用户账户
+symbol_code sym_code  //币名
+string  actn          //动作：添加或删除，字符串为 add 或 remove
+name    vip           //vip用户账户
 ```
 
 大致流程：
 
 1. 校验权限。
 2. 根据sym_code确定scope, 在vips表中增加或删除一条记录。
-3. 补充：vips表初始化后，同时也需要初始化vipfees和viplimits表。
+3. vips表初始化后，同时也需要初始化vipfees和viplimits表。
 4. action为"add"时，增加记录；action为"remove"时，删除记录。
 5. vip账号必须是合法的BOS账号。必须真实存在。
 6. vip账号不能是角色账号。
-7. **需要验证该vip账户是否已经被设置成vip账户，若已经设置，则禁用**
+7. 需要验证该vip账户是否已经被设置成vip账户，若已经设置，则禁用
 
 ```
 cleos push action btc.bos setvip '["BTC", "add", "huobihuaping"]' -p huobimanager
@@ -311,19 +382,19 @@ cleos push action usdt.bos setvip '["USDT","add", "huobihuaping"]' -p huobimanag
 
 ### 十一、setviplimit
 
-功能：承兑商设置单个用户的单次最大换币金额、单次最小换币金额、单日累计换币限额、单日累计换币次数、两次换币的间隔
-权限：管理员
-机制：严格锚定制
-参数：
+功能：承兑商设置单个用户的单次最大换币金额、单次最小换币金额、单日累计换币限额、单日累计换币次数、两次换币的间隔  
+权限：管理员(manager)  
+机制：严格锚定制  
+参数：  
 
 ```
-symbol_code  sym_code  //币名。如BTC、ETH、USDT
-name vip //VIP用户账号
-asset   maximum_limit  //单次最大换币金额。每个账号每次换币金额大于此数, 承兑商不换币。默认值为：BTC 1   ETH 1  USDT 1
-asset   minimum_limit  //单次最小换币金额。每个账号每次换币金额小于此数，承兑商不换币。默认值为：BTC 0.00005  ETH 0.00005 USDT 0.00005
-asset   total_limit  //单日累计换币限额。每个账号每日换币总额大于此数，承兑商不换币。默认值为：BTC 10 ETH 10  USDT 10
-uint64_t frequency_limit   //单日累计换币次数。 每个账号每日换币次数大于此数，则承兑商不换币。默认值为：BTC 3 ETH 3  USDT 3
-uint64_t interval_limit //两次换币的间隔秒数。每个账号两次换币间隔秒数小于次数，承兑商不换币。默认值为：300
+symbol_code  sym_code     //币名。如BTC、ETH、USDT
+name vip                  //vip用户账号
+asset   maximum_limit     //单次最大换币金额。每个账号每次换币金额大于此数, 承兑商不换币。默认值为：BTC 1   ETH 1  USDT 1
+asset   minimum_limit     //单次最小换币金额。每个账号每次换币金额小于此数，承兑商不换币。默认值为：BTC 0.00005  ETH 0.00005 USDT 0.00005
+asset   total_limit       //单日累计换币限额。每个账号每日换币总额大于此数，承兑商不换币。默认值为：BTC 10 ETH 10  USDT 10
+uint64_t frequency_limit  //单日累计换币次数。 每个账号每日换币次数大于此数，则承兑商不换币。默认值为：BTC 3 ETH 3  USDT 3
+uint64_t interval_limit   //两次换币的间隔秒数。每个账号两次换币间隔秒数小于次数，承兑商不换币。默认值为：300
 ```
 
 大致流程：
@@ -340,45 +411,43 @@ cleos push action usdt.bos setviplimit '["USDT","huobihuaping", "1.00000000 USDT
 
 ### 十二、setvipfee
 
-功能：承兑商设置单个用户的服务费。提币/销币时收取，充币/铸币时不收取。按提币/销币金额收取相应费率的手续费。
-权限：管理员
-机制：严格锚定制
+功能：承兑商设置单个用户的服务费。销币时收取，铸币时不收取。按销币金额收取相应费率的手续费。  
+权限：管理员(manager)  
+机制：严格锚定制  
 参数：
 
 ```
-symbol_code  sym_code  //币名。如BTC、ETH、USDT
-name vip //VIP用户账号
-double  service_fee_rate     //服务费率   默认0.001 （千分之一）
-asset   min_service_fee     //服务费最低收费  默认0.0005
-asset   miner_fee  //矿工费  默认 BTC 0.00004 ETH 0.00004
+symbol_code  sym_code     //币名。如BTC、ETH、USDT
+name vip                  //vip用户账号
+double  service_fee_rate  //服务费率   默认0.001 （千分之一）
+asset   min_service_fee   //服务费最低收费  默认0.0005
+asset   miner_fee         //矿工费  默认 BTC 0.00004 ETH 0.00004
 ```
 
 大致流程：
 
 1. 校验权限。
-
 2. 判断所有的asset是否与sym_code为同一种币，若不是，则报错。
-
 3. 根据sym_code，以及 vip的账户名,  修改vips表的service_fee_rate、min_service_fee、miner_fee字段。
 
 ```
 cleos push action btc.bos setvipfee '["BTC", "huobihuaping","0.001","0.00005000 BTC", "0.00004000 BTC"]' -p huobimanager
-cleos push action eth.bos setvipfee 
+cleos push action eth.bos setvipfee
 '["ETH","huobihuaping", "0.001","0.00005000 ETH", "0.00004000 ETH"]' -p huobimanager
 cleos push action usdt.bos setvipfee '["USDT","huobihuaping", "0.001","0.00005000 USDT", "0.00004000 USDT"]' -p huobimanager
 ```
 
 ### 十三、setcheck
 
-功能：承兑商设置资金出入是否需要审核。
-权限：管理员
-机制：严格锚定制
+功能：承兑商设置资金出入是否需要审核。  
+权限：管理员(manager)  
+机制：严格锚定制  
 参数：
 
 ```
 symbol_code  sym_code  //币名。如BTC、ETH、USDT
-bool in_check  //相对于BOS链的资金流入是否需要审核。false：无需审核；true：需要审核。默认为false。
-bool out_check //相对于BOS链的资金流出是否需要审核。false：无需审核；true：需要审核。 默认为false。
+bool in_check          //相对于BOS链的资金流入是否需要审核。false：无需审核；true：需要审核。默认为false。
+bool out_check         //相对于BOS链的资金流出是否需要审核。false：无需审核；true：需要审核。 默认为false。
 ```
 
 大致流程：
@@ -394,14 +463,14 @@ cleos push action usdt.bos setcheck '["USDT",false,true]' -p huobimanager
 
 ### 十四、resetaddress
 
-功能：承兑商重置地址。
-权限：管理员
-机制：严格锚定制
+功能：承兑商重置地址。  
+权限：管理员(manager)  
+机制：严格锚定制  
 参数：
 
 ```
 symbol_code sym_code  //币名。如BTC、ETH、USDT
-name to   //需要分配地址的账号
+name to               //需要分配地址的账号
 ```
 
 大致流程：
@@ -410,7 +479,7 @@ name to   //需要分配地址的账号
 2. 校验to是否为合法的BOS账号。此账号必须在BOS上真实存在。不能是除gatherer外的角色账号。
 3. 若to不在addrs表，则报错。
 4. 根据to, 读取addrs表，获得该用户已分配地址，若为空，则报错。
-5. 根据sym_code和to，修改addrs表中一条记录。将address字段置为空， state字段置为owner.value。
+5. 根据sym_code和to，修改addrs表中一条记录。将address字段置为空，state字段置为owner.value。
 
 ```
 cleos push action btc.bos resetaddress '[ "BTC", "xiaomingming" ]' -p huobimanager
@@ -420,35 +489,34 @@ cleos push action usdt.bos resetaddress '[ "USDT", "huobihuaping" ]' -p huobiman
 
 ### 十五、precast
 
-功能：承兑商预铸币。用户从其他链向BOS链换币时，在BOS链上，承兑商给普通用户预转账。注意：此时并未真正转账，需要审核员审核。用于需要审核的场景。由承兑商保证1：1兑换。例如：承兑商在BTC主网的所有地址中有1000个BTC，则在BOS链也存在1000个BTC。
-
-权限：出纳员。
-机制：严格锚定制
+功能：承兑商预铸币。用户从其他链向BOS链换币时，在BOS链上，承兑商给普通用户预铸币。注意：此时并未真正铸币，需要审核员审核。用于需要审核的场景。由承兑商保证1：1兑换。例如：承兑商在BTC主网的所有地址中有1000个BTC，则在BOS链也存在1000个BTC。  
+权限：出纳员(teller)  
+机制：严格锚定制  
 参数：
 
 ```
 symbol_code sym_code  //币名。如BTC、ETH、USDT
-string to_address //BTC地址、ETH地址、USDT地址
-name to_account //普通用户账号。
-string remote_trx_id //BTC链、ETH链、USDT链的交易号
-asset quantity       //需要发行的相应币种的数额
-uint64_t index //序号
-string memo        //备注
+string to_address     //BTC地址、ETH地址、USDT地址
+name to_account       //普通用户账号。
+string remote_trx_id  //BTC链、ETH链、USDT链的交易号
+asset quantity        //需要发行的相应币种的数额
+uint64_t index        //序号
+string memo           //备注
 ```
 
-大致流程： 
+大致流程：
 
 1. 根据sym_code，查询checks表，校验审核配置，配置不对则报错。此函数只用于“资金流入需要审核”的场景。
 2. 判断是否已经锁定，如果已锁定，则报错并提示。
-3. 校验权限。 
+3. 校验权限。
 4. 校验to_account账号的合法性。
-5. 此账号必须在BOS上真实存在。不能是角色账户。 
-6. quantity必须大于0 
-7. BTC 精度为8 ETH精度为8 USDT精度为8 
-8. memo可以为空 
-9. 根据quantity所携带的symbol信息确定scope 
-10. create_time为当前时间。 msg填充memo字段。 
-11. 铸币前, 查表casts, 若表中已经有相同的铸币hash+index，则报错。 
+5. 此账号必须在BOS上真实存在。不能是角色账户。
+6. quantity必须大于0
+7. BTC 精度为8 ETH精度为8 USDT精度为8
+8. memo可以为空
+9. 根据quantity所携带的symbol信息确定scope
+10. create_time为当前时间。 msg填充memo字段。
+11. 铸币前, 查表casts, 若表中已经有相同的铸币hash+index，则报错。
 12. 铸币前, 判断to_address在链上通过assignaddr绑定的account，是否与参数to_account值一致，若不一致，则报错。
 13. 向casts表插入一条数据，need_check置为true，enable字段置为false。
 
@@ -463,21 +531,21 @@ cleos push action usdt.bos precast '["USDT", "3JQSigWTCHyBLRD979JWgEtWP5YiiFwcQB
 ### 十六、assignaddr
 
 功能：承兑商给账户分配地址。    
-权限：出纳员
-机制：严格锚定制
+权限：出纳员(teller)  
+机制：严格锚定制  
 参数：
 
 ```
 symbol_code sym_code  //币名。如BTC、ETH、USDT
-name to   //需要分配地址的账号
-string address  //相应币种地址，如BTC、ETH、USDT
+name to               //需要分配地址的账号
+string address        //相应币种地址，如BTC、ETH、USDT
 ```
 
 大致流程：
 
 1. 校验权限。
 2. 校验address是否为相应币种的合法地址。
-3. 校验to是否为合法的BOS账号。此账号必须在BOS上真实存在。不能是除gatherer外的角色账号。 
+3. 校验to是否为合法的BOS账号。此账号必须在BOS上真实存在。不能是除gatherer外的角色账号。
 4. 根据address，查询addrs表和records表，若存在，则报错。
 5. 根据to，查询addrs表，若不存在，则报错；若address字段不为空，则报错。
 6. 根据sym_code和to，在**addrs**表中修改一条记录，修改address字段， state字段置为0，assign_time为当前时间
@@ -490,38 +558,38 @@ cleos push action usdt.bos assignaddr '["USDT", "huobihuaping", "1F7XiwJTfZEpFDG
 
 ### 十七、confirmback
 
-功能： 从BOS链向其他链换币，成功时，承兑商反馈信息。
-权限：出纳员
-机制：严格锚定制
+功能： 从BOS链向其他链换币，成功时，承兑商反馈信息。  
+权限：出纳员(teller)  
+机制：严格锚定制  
 参数：
 
 ```
 symbol_code sym_code  //币名。如BTC、ETH
 string remote_trx_id  //其他链上提币的交易号
 uint64_t id           //melts表记录中的主键id
-uint64_t remote_index //序号  表明其他链上的一笔交易对应的vin/vout index
-string memo  //备注
+uint64_t remote_index //序号，表明其他链上的一笔交易对应的vin/vout index
+string memo           //备注
 ```
 
 大致流程：
 
-1. 判断是否已经锁定，如果已锁定，则报错并提示。
-2. 校验权限。
-3. 根据sym_code确定scope。
-4. 根据主键id查询melts表记录，填充melts表中的remote_trx_id和remote_index,memo可以为空。
-5. 将state置为2.
+1. 判断是否已经锁定，如果已锁定，则报错并提示。  
+2. 校验权限。  
+3. 根据sym_code确定scope。  
+4. 根据主键id查询melts表记录，填充melts表中的remote_trx_id和remote_index,memo可以为空。  
+5. 将state置为2  
 
 ### 十八、denyback
 
 功能： 从BOS链向其他链换币，失败时，承兑商反馈信息。
-权限：出纳员
+权限：出纳员(teller)
 机制：严格锚定制
 参数：
 
 ```
 symbol_code sym_code  //币名。如BTC、ETH
-uint64_t id //melts表记录中的主键id
-string memo  //备注
+uint64_t id           //melts表记录中的主键id
+string memo           //备注
 ```
 
 大致流程：
@@ -534,39 +602,39 @@ string memo  //备注
 6. 将state置为5.
 7. 根据主键id查询melts表记录，查出melts表的amount，填充melts表中的state
 8. 根据sym_code，增加infos表的supply字段的值，值为amount。
-9. 增加accounts表的balance值，值为amount。**以内联action的方式调用retreat**
+9. 增加accounts表的balance值，值为amount。以内联action的方式调用retreat
 
 ### 十九、agreecast
 
-功能：审核员放行铸币。用于需要审核的场景。
-权限：审核员
-机制：严格锚定制
+功能：审核员放行铸币。用于需要审核的场景。  
+权限：审核员(auditor)  
+机制：严格锚定制  
 参数：
 
 ```
 symbol_code sym_code  //币名。如BTC、ETH、USDT
-string to_address //BTC地址、ETH地址、USDT地址
-name to_account //普通用户账号。
-name auditor //审核员账号。
-string remote_trx_id //BTC链、ETH链、USDT链的交易号
-asset quantity       //需要发行的相应币种的数额
-uint64_t index //序号 主链交易的vout index
-string memo        //备注
+string to_address     //BTC地址、ETH地址、USDT地址
+name to_account       //普通用户账号。
+name auditor          //审核员账号。
+string remote_trx_id  //BTC链、ETH链、USDT链的交易号
+asset quantity        //需要发行的相应币种的数额
+uint64_t index        //序号，主链交易的vout index
+string memo           //备注
 ```
 
-大致流程： 
+大致流程：
 
 1. 根据sym_code，查询checks表，校验审核配置，配置不对则报错。此函数只用于“资金流入需要审核”的场景。
 2. 判断是否已经锁定，如果已锁定，则报错并提示。
-3. 校验权限。 
-4. 校验to_account账号的合法性。此账号必须在BOS上真实存在。不能是角色账户。 
-5. quantity必须大于0 
-6. BTC 精度为8 ETH精度为8 USDT精度为8 
-7. memo可以为空 
+3. 校验权限。
+4. 校验to_account账号的合法性。此账号必须在BOS上真实存在。不能是角色账户。
+5. quantity必须大于0
+6. BTC 精度为8 ETH精度为8 USDT精度为8
+7. memo可以为空
 8. 根据sym_code确定scope 。判断sym_code和quantity所携带的symbol信息是否相同。
-9. 查表casts, 若表中没有相同的铸币hash+index，则报错。 
+9. 查表casts, 若表中没有相同的铸币hash+index，则报错。
 10. 判断to_address在链上通过assignaddr绑定的account，是否与参数to_account值一致，若不一致，则报错。
-11. 增加to_account的余额 
+11. 增加to_account的余额
 12. 增加infos表中supply的值
 13. 修改casts表之前，检查state是否为0，若否则报错，不能操作已完成cast；agreecast成功后，将state改为2
 14. 修改casts表，生成交易号填充casts的trx_id字段，update_time为当前时间。 msg填充memo字段。
@@ -576,35 +644,35 @@ string memo        //备注
 
 ### 二十、refusecast
 
-功能：审核员拒绝铸币。用于需要审核的场景。
-权限：审核员
-机制：严格锚定制
+功能：审核员拒绝铸币。用于需要审核的场景。  
+权限：审核员(auditor)  
+机制：严格锚定制  
 参数：
 
 ```
 symbol_code sym_code  //币名。如BTC、ETH、USDT
-string to_address //BTC地址、ETH地址、USDT地址
-name to_account //普通用户账号。
-name auditor //审核员账号。
-string remote_trx_id //BTC链、ETH链、USDT链的交易号
-asset quantity       //需要发行的相应币种的数额
-uint64_t index //序号
-string memo        //备注
+string to_address     //BTC地址、ETH地址、USDT地址
+name to_account       //普通用户账号。
+name auditor          //审核员账号。
+string remote_trx_id  //BTC链、ETH链、USDT链的交易号
+asset quantity        //需要发行的相应币种的数额
+uint64_t index        //序号
+string memo           //备注
 ```
 
-大致流程： 
+大致流程：
 
 1. 根据sym_code，查询checks表，校验审核配置，配置不对则报错。此函数只用于“资金流入需要审核”的场景。
 2. 判断是否已经锁定，如果已锁定，则报错并提示。
-3. 校验权限。 
+3. 校验权限。
 4. 校验to_account账号的合法性。
-5. 此账号必须在BOS上真实存在。不能是角色账户。 
-6. quantity必须大于0 
-7. BTC 精度为8 ETH精度为8 USDT精度为8 
-8. memo可以为空 
-9. 根据quantity所携带的symbol信息确定scope 
-10. update_time为当前时间。 msg填充memo字段。 
-11. 查表casts, 若表中没有相同的铸币hash+index，则报错。 
+5. 此账号必须在BOS上真实存在。不能是角色账户。
+6. quantity必须大于0
+7. BTC 精度为8 ETH精度为8 USDT精度为8
+8. memo可以为空
+9. 根据quantity所携带的symbol信息确定scope
+10. update_time为当前时间。 msg填充memo字段。
+11. 查表casts, 若表中没有相同的铸币hash+index，则报错。
 12. 判断to_address在链上通过assignaddr绑定的account，是否与参数to_account值一致，若不一致，则报错。
 13. 修改casts表之前，检查state是否为0，若否则报错，不能操作已完成cast；refusecast成功后，将state改为5
 14. 记录审核员账户。
@@ -612,14 +680,14 @@ string memo        //备注
 
 ### 二十一、lockall
 
-功能： 承兑商锁定服务。此时所有的提币、充币、转账都无法进行。
-权限：制动员
-机制：严格锚定制
-参数：
+功能： 承兑商锁定服务。此时所有的提币、充币、转账都无法进行。  
+权限：制动员(brakeman)  
+机制：严格锚定制  
+参数：  
 
 ```
 symbol_code sym_code  //币名。如BTC、ETH、USDT
-name  brakeman //制动员账号
+name  brakeman        //制动员账号
 ```
 
 大致流程：
@@ -635,14 +703,14 @@ cleos push action usdt.bos lockall '["USDT","hbhbbrakeman"]' -p hbhbbrakeman
 
 ### 二十二、unlockall
 
-功能： 承兑商恢复服务。此时所有的提币、充币、转账都恢复正常。
-权限：制动员
-机制：严格锚定制
+功能： 承兑商恢复服务。此时所有的提币、充币、转账都恢复正常。  
+权限：制动员(brakeman)  
+机制：严格锚定制  
 参数：
 
 ```
 symbol_code sym_code  //币名。如BTC、ETH、USDT
-name brakeman //制动员账号
+name brakeman         //制动员账号
 ```
 
 大致流程：
@@ -658,29 +726,29 @@ cleos push action usdt.bos unlockall '["USDT","hbhbbrakeman"]' -p hbhbbrakeman
 
 ### 二十三、 melt
 
-功能：承兑商销币。普通用户从BOS链向其他链换币时，用户将资产转给承兑商的出纳员。 用于无需审核的场景。由承兑商保证1：1兑换。例如：承兑商在BTC主网的所有地址中有1000个BTC，则在BOS链也存在1000个BTC。  
-权限：普通用户
-机制：严格锚定制
+功能：承兑商销币。普通用户从BOS链向其他链换币时，用户将资产销毁。 用于无需审核的场景。由承兑商保证1：1兑换。例如：承兑商在BTC主网的所有地址中有1000个BTC，则在BOS链也存在1000个BTC。    
+权限：普通用户(user)  
+机制：严格锚定制  
 参数：
 
 ```
 name from_account //普通用户账号。
 string to_address //提币的目的地。若为BTC或ETH或USDT，则该字段填入BTC或ETH或USDT的地址。需要校验BTC地址、ETH地址、USDT地址的合法性。
-asset quantity       //需要销毁的相应币种的总额
-string memo        //备注
+asset quantity    //需要销毁的相应币种的总额
+string memo       //备注
 ```
 
-大致流程： 
+大致流程：
 
 1. 根据sym_code，查询checks表，校验审核配置，配置不对则报错。此函数只用于“资金流出无需审核”的场景。
 2. 判断是否已经锁定，如果已锁定，则报错并提示。
 3. 校验权限。 在具体版本中进行校验
 4. 校验from_account是否为合法的BOS账号。此账号必须在BOS上真实存在。 不能为除gatherer外的角色账号。
-5. 校验to_address是否为合法的BTC地址、ETH地址、USDT的地址。 
-6. quantity必须大于0 
-7. 补充：from_account账户余额必须大于quantity
-8. BTC 精度为8 ETH精度为8 USDT精度为8 
-9. 根据quantity所携带的symbol信息确定scope 
+5. 校验to_address是否为合法的BTC地址、ETH地址、USDT的地址。
+6. quantity必须大于0
+7. from_account账户余额必须大于quantity
+8. BTC 精度为8 ETH精度为8 USDT精度为8
+9. 根据quantity所携带的symbol信息确定scope
 10. 若符合下述“禁止提币”的条件，则报错。其中：若为vip用户，则判断该用户的限制条件；若不是vip用户，则使用通用的限制条件。
 11. 计算费用。计算方式为：max(总额乘以费率， 最小收费)
 12. 其中费率和最小收费的取值为：如果为VIP用户，则为VIP用户的费率和最小收费；否则，为通用的费率和最小收费。
@@ -701,40 +769,35 @@ cleos push action usdt.bos melt '["huobihuaping", "0xe53d7a25f9b1769d0a9b6ae6741
 
 ### 二十四、applyaddr
 
-功能：用户申请分配地址。    
-权限：普通用户
-机制：严格锚定制
+功能：用户申请分配地址。      
+权限：普通用户(user)   
+机制：严格锚定制   
 参数：
 
 ```
 symbol_code sym_code  //币名。如BTC、ETH、USDT
-name to   //需要分配地址的账号
+name to               //需要分配地址的账号
 ```
 
 大致流程：
 
 1. 校验权限。
-
 2. 校验to是否为合法的BOS账号。此账号必须在BOS上真实存在。不能是除gatherer外的角色账号。
-
 3. 若to在addrs表，则报错。
-
 4. 根据sym_code，在addrs表中增加一条记录。
-
 5. 此时owner字段置为to，address字段为空， state字段为owner.value
-
-6. create_time为当前时间，**assign_time为空**
+6. create_time为当前时间，assign_time为空
 
 ### 二十五、 ruin
 
-功能：普通用户毁掉代币。
-权限：普通用户
-机制：严格锚定制
+功能：普通用户毁掉代币。  
+权限：普通用户(user)  
+机制：严格锚定制  
 参数：
 
 ```
 asset   quantity  //需要毁掉的资产总数
-name user
+name    user
 ```
 
 大致流程：
@@ -753,14 +816,14 @@ cleos push action usdt.bos ruin '[ "0.90000000 USDT", "huobihuaping" ]' -p huobi
 
 ### 二十六、pay
 
-功能：普通用户给收费员转账。
-权限：普通用户
-机制：严格锚定制
+功能：普通用户给收费员转账。  
+权限：普通用户(user)  
+机制：严格锚定制  
 参数：
 
 ```
 asset   quantity  //需要转账的资产总数
-name  user
+name    user
 ```
 
 大致流程：
@@ -779,13 +842,13 @@ cleos push action usdt.bos pay '[ "0.90000000 USDT", "huobihuaping" ]' -p huobih
 
 ### 二十七、retreat
 
-功能：退回代币
-权限：出纳员
-机制：严格锚定制
+功能：退回代币  
+权限：出纳员(teller)  
+机制：严格锚定制  
 参数：
 
 ```
-name    to //转入账号
+name    to        //转入账号
 asset   quantity  //需要生成的资产总数
 ```
 
@@ -799,16 +862,46 @@ asset   quantity  //需要生成的资产总数
 
 ### 二十七、notifymelt
 
-功能：传递销币记录id。
-权限：普通用户
-机制：严格锚定制
+功能：传递销币记录id    
+权限：普通用户(user)  
+机制：严格锚定制  
 参数：
 ```
-uint64_t id  //序号。melts表记录的主键id。
+uint64_t id  //序号，melts表记录的主键id。
 ```
 
 大致流程：
 函数不需要实现任何逻辑，只需要传参melts表记录的主键id。
+
+### 二十八、transfer
+
+功能：转账。用户铸币成功后，可以使用转账功能在BOS全网进行资产转移，比如去dapp消费   
+权限：普通用户(user)    
+机制：严格锚定制    
+参数：   
+```
+name    from      //转出账号。
+name    to        //转入账号。
+asset   quantity  //需要转账的资产总数
+string  memo      //备注
+```
+
+大致流程：
+
+1. 判断是否已经锁定，如果已锁定，则报错并提示。
+2. 权限校验。
+3. 校验from和to是否为合法的BOS账号。
+4. quantity必须大于0。
+5. from账户余额必须大于quantity
+6. 根据quantity携带symbol确定scope
+7. 根据from和to，查找accounts表，减小from的balance值，增加to的balance值
+
+```
+cleos push action btc.bos transfer '[ "huobihuaping", "huobiliqiang", "0.90000000 BTC", "BTC转账" ]' -p huobihuaping
+cleos push action eth.bos transfer '[ "huobihuaping", "huobiliqiang
+", "0.90000000 ETH", "ETH转账" ]' -p huobihuaping
+cleos push action usdt.bos transfer '[ "huobihuaping", "huobiliqiang", "0.90000000 USDT", "USDT转账" ]' -p huobihuaping
+```
 
 # 第三部分：表结构设计
 
@@ -861,7 +954,7 @@ cleos get table eth.bos ETH addrs
 
 每个地址一条记录。
 
-scope:  币种 如BTC、ETH、BTCZB、ETHZB 
+scope:  币种 如BTC、ETH、BTCZB、ETHZB
 
 字段：
 
@@ -881,7 +974,7 @@ scope: 币种 如BTC、ETH
 
 ```
 name  owner  //普通用户账号。   主键    
-time_point_sec   last_time  //上次提币时间 
+time_point_sec   last_time  //上次提币时间
 frequency // 24h之内用户的提币次数上限。如果本次提币距离上次提币超过24h，则重置次数
 total  // 24h之内用户的提币总额上限。如果本次提币距离上次提币超过24h，则重置总额
 time_point_sec       update_time    //统计时间
@@ -903,7 +996,7 @@ asset    balance //账号拥有的该币种的余额。主键。
 ```
 
 ```
-cless get table btc.bos huobihuaping accounts
+cleos get table btc.bos huobihuaping accounts
 cleos get table eth.bos huobiliqiang accounts
 ```
 
@@ -911,7 +1004,7 @@ cleos get table eth.bos huobiliqiang accounts
 
 介绍：用户提币记录
 
-scope: 币种 如BTC、ETH、USDT 
+scope: 币种 如BTC、ETH、USDT
 
 字段：
 
@@ -947,7 +1040,7 @@ cleos get table usdt.bos USDT melts
 
 介绍：用户充币记录
 
-scope: 币种 如BTC、ETH、USDT 
+scope: 币种 如BTC、ETH、USDT
 
 字段：
 
@@ -1003,7 +1096,7 @@ scope: 币种 如BTC、ETH
 字段：
 
 ```
-name  owner  //vip用户账号。   主键 
+name  owner  //vip用户账号。   主键
 asset    maximum_limit //单次最大换币金额
 asset    minimum_limit //单次最小换币金额
 asset    total_limit //单日累计换币总额
@@ -1024,7 +1117,7 @@ scope: 币种 如BTC、ETH
 
 字段：
 
-    name  owner  //vip用户账号。   主键 
+    name  owner  //vip用户账号。   主键
     double   service_fee_rate //服务费率
     asset    min_service_fee //服务费最低收费
     asset    miner_fee //矿工费
@@ -1083,7 +1176,7 @@ asset    min_service_fee //服务费最低收费
 asset    miner_fee //矿工费
 ```
 
-### 表 managers 
+### 表 managers
 
 介绍：承兑商的管理员, 每个管理员一条记录。
 
@@ -1100,7 +1193,7 @@ cleos get table btc.bos BTC managers
 cleos get table eth.bos ETH managers
 ```
 
-### 表 tellers 
+### 表 tellers
 
 介绍：承兑商的出纳员, 每个出纳员一条记录。
 
@@ -1117,7 +1210,7 @@ cleos get table btc.bos BTC tellers
 cleos get table eth.bos ETH tellers
 ```
 
-### 表 auditors 
+### 表 auditors
 
 介绍：承兑商的审核员, 每个审核员一条记录。
 
@@ -1134,7 +1227,7 @@ cleos get table btc.bos BTC auditors
 cleos get table eth.bos ETH auditors
 ```
 
-### 表 gathers 
+### 表 gathers
 
 介绍：承兑商的收费员, 每个收费员一条记录。
 
@@ -1151,7 +1244,7 @@ cleos get table btc.bos BTC gathers
 cleos get table eth.bos ETH gathers
 ```
 
-### 表 brakemans 
+### 表 brakemans
 
 介绍：承兑商的制动员, 每个制动员一条记录。
 
