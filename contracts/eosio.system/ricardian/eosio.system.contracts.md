@@ -17,7 +17,6 @@ As an authorized party I {{ signer }} wish to bid on behalf of {{ bidder }} the 
 spec-version: 0.0
 title: Buy RAM
 summary: This action will attempt to reserve about {{quant}} worth of RAM on behalf of {{receiver}}.
-
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
 ---
 
@@ -32,7 +31,6 @@ icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8b
 spec-version: 0.0
 title: Buy RAM Bytes
 summary: This action will attempt to reserve about {{bytes}} bytes of RAM on behalf of {{receiver}}.
-
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
 ---
 
@@ -176,7 +174,6 @@ As an authorized party I {{ signer }} wish to sell {{ bytes }} of unused RAM fro
 spec-version: 0.0
 title: Set new producer schedule
 summary: The {{ setprods }} action creates a new schedule of active producers, who will produce blocks in the order given.
-
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
 ---
 THIS IS A SYSTEM COMMAND NOT AVAILABLE FOR DIRECT ACCESS BY USERS.
@@ -190,7 +187,6 @@ As an authorized party I {{ signer }} wish to set the rotation of producers to b
 spec-version: 0.0
 title: Undelegate bandwidth
 summary: The intent of the {{ undelegatebw }} action is to unstake tokens from CPU and/or bandwidth.
-
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
 ---
 As an authorized party I {{ signer }} wish to unstake {{ unstake_cpu_quantity }} from CPU and {{ unstake_net_quantity }} from bandwidth from the tokens owned by {{ from }} previously delegated for the use of delegatee {{ to }}.
@@ -204,7 +200,6 @@ If I as signer am not the beneficial owner of these tokens I stipulate I have pr
 spec-version: 0.0
 title: Unregister as Block Producer  
 summary: The {{ unregprod }} action unregisters a previously registered block producer candidate.
-
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
 ---
 As an authorized party I {{ signer }} wish to unregister the block producer candidate {{ producer }}, rendering that candidate no longer able to receive votes.
@@ -216,7 +211,6 @@ As an authorized party I {{ signer }} wish to unregister the block producer cand
 spec-version: 0.0
 title: Vote for Block Producer(s)  
 summary: The intent of the {{ voteproducer }} action is to cast a valid vote for up to 30 BP candidates.
-
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
 ---
 
