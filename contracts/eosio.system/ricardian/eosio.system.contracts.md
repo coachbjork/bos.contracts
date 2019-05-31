@@ -2,8 +2,7 @@
    bidname
 </h1>
 ---
-
-spec-version: 0
+spec-version: 0.0
 title: Bid on premium account name
 summary: The {{ bidname }} action places a bid on a premium account name, in the knowledge that the high bid will purchase the name.
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
@@ -15,8 +14,7 @@ As an authorized party I {{ signer }} wish to bid on behalf of {{ bidder }} the 
    buyram
 </h1>
 ---
-
-spec-version: 0
+spec-version: 0.0
 title: Buy RAM
 summary: This action will attempt to reserve about {{quant}} worth of RAM on behalf of {{receiver}}.
 
@@ -31,8 +29,7 @@ icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8b
    buyrambytes
 </h1>
 ---
-
-spec-version: 0
+spec-version: 0.0
 title: Buy RAM Bytes
 summary: This action will attempt to reserve about {{bytes}} bytes of RAM on behalf of {{receiver}}.
 
@@ -47,8 +44,7 @@ icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8b
    canceldelay
 </h1>
 ---
-
-spec-version: 0
+spec-version: 0.0
 title: Cancel delayed transaction
 summary: The {{ canceldelay }} action cancels an existing delayed transaction.
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
@@ -60,8 +56,7 @@ As an authorized party I {{ signer }} wish to invoke the authority of {{ canceli
    claimrewards
 </h1>
 ---
-
-spec-version: 0
+spec-version: 0.0
 title: Claim rewards
 summary: The {{ claimrewards }} action allows a block producer (active or standby) to claim the system rewards due them for producing blocks and receiving votes.
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
@@ -73,8 +68,7 @@ As an authorized party I {{ signer }} wish to have the rewards earned by {{ owne
    delegatebw
 </h1>
 ---
-
-spec-version: 0
+spec-version: 0.0
 title: Delegate Bandwidth
 summary: The intent of the {{ delegatebw }} action is to stake tokens for bandwidth and/or CPU and optionally transfer ownership.
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
@@ -92,8 +86,7 @@ As signer I stipulate that, if I am not the beneficial owner of these tokens, I 
    newaccount
 </h1>
 ---
-
-spec-version: 0
+spec-version: 0.0
 title: Create a new account
 summary: The {{ newaccount }} action creates a new account.
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
@@ -105,8 +98,7 @@ As an authorized party I {{ signer }} wish to exercise the authority of {{ creat
    refund
 </h1>
 ---
-
-spec-version: 0
+spec-version: 0.0
 title: Refund unstaked tokens
 summary: The intent of the {{ refund }} action is to return previously unstaked tokens to an account after the unstaking period has elapsed.
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
@@ -118,8 +110,7 @@ As an authorized party I {{ signer }} wish to have the unstaked tokens of {{ own
    regproducer
 </h1>
 ---
-
-spec-version: 0
+spec-version: 0.0
 title: Register as block producer
 summary: The intent of the {{ regproducer }} action is to register an account as a BP candidate.
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
@@ -171,27 +162,23 @@ I, {{producer}}, agree not to set the RAM supply to more RAM than my nodes conta
    sellram
 </h1>
 ---
-
-spec-version: 0
+spec-version: 0.0
 title: Sell Ram
 summary: The {{ sellram }} action sells unused RAM for tokens.
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
 ---
-
 As an authorized party I {{ signer }} wish to sell {{ bytes }} of unused RAM from account {{ account }}.
 
 <h1 class="contract">
    setprods
 </h1>
 ---
-
-spec-version: 0
+spec-version: 0.0
 title: Set new producer schedule
 summary: The {{ setprods }} action creates a new schedule of active producers, who will produce blocks in the order given.
 
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
 ---
-
 THIS IS A SYSTEM COMMAND NOT AVAILABLE FOR DIRECT ACCESS BY USERS.
 
 As an authorized party I {{ signer }} wish to set the rotation of producers to be {{ schedule }}.
@@ -200,14 +187,12 @@ As an authorized party I {{ signer }} wish to set the rotation of producers to b
    undelegatebw
 </h1>
 ---
-
-spec-version: 0
+spec-version: 0.0
 title: Undelegate bandwidth
 summary: The intent of the {{ undelegatebw }} action is to unstake tokens from CPU and/or bandwidth.
 
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
 ---
-
 As an authorized party I {{ signer }} wish to unstake {{ unstake_cpu_quantity }} from CPU and {{ unstake_net_quantity }} from bandwidth from the tokens owned by {{ from }} previously delegated for the use of delegatee {{ to }}.
 
 If I as signer am not the beneficial owner of these tokens I stipulate I have proof that I’ve been authorized to take this action by their beneficial owner(s).
@@ -216,22 +201,19 @@ If I as signer am not the beneficial owner of these tokens I stipulate I have pr
    unregprod
 </h1>
 ---
-
-spec-version: 0
+spec-version: 0.0
 title: Unregister as Block Producer  
 summary: The {{ unregprod }} action unregisters a previously registered block producer candidate.
 
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
 ---
-
 As an authorized party I {{ signer }} wish to unregister the block producer candidate {{ producer }}, rendering that candidate no longer able to receive votes.
 
 <h1 class="contract">
    voteproducer
 </h1>
 ---
-
-spec-version: 0
+spec-version: 0.0
 title: Vote for Block Producer(s)  
 summary: The intent of the {{ voteproducer }} action is to cast a valid vote for up to 30 BP candidates.
 
