@@ -74,12 +74,6 @@ icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8b
 
 As an authorized party I {{ signer }} wish to stake {{ stake_cpu_quantity }} for CPU and {{ stake_net_quantity }} for bandwidth from the liquid tokens of {{ from }} for the use of delegatee {{ to }}.
 
-{{if transfer }}
-It is {{ transfer }} that I wish these tokens to become immediately owned by the delegatee.
-
-{{/if}}
-As signer I stipulate that, if I am not the beneficial owner of these tokens, I have proof that I’ve been authorized to take this action by their beneficial owner(s).
-
 <h1 class="contract">
    newaccount
 </h1>
@@ -138,8 +132,6 @@ summary: The intent of the {{ undelegatebw }} action is to unstake tokens from C
 icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
 ---
 As an authorized party I {{ signer }} wish to unstake {{ unstake_cpu_quantity }} from CPU and {{ unstake_net_quantity }} from bandwidth from the tokens owned by {{ from }} previously delegated for the use of delegatee {{ to }}.
-
-If I as signer am not the beneficial owner of these tokens I stipulate I have proof that I’ve been authorized to take this action by their beneficial owner(s).
 
 <h1 class="contract">
    regproducer
