@@ -244,6 +244,18 @@ As an authorized party I {{ signer }} wish to remove the linked {{ authorization
 The `unlinkauth` action is used to remove an linked authorization between a stated permission and the provided key or account.
 
 <h1 class="contract">
+   setabi
+</h1>
+---
+spec-version: 0.0
+title: Set ABI
+summary: Set ABI to account.
+icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
+---
+
+As an authorized party I {{ signer }} wish to set ABI to {{ account }}.
+
+<h1 class="contract">
    buyrex
 </h1>
 ---
