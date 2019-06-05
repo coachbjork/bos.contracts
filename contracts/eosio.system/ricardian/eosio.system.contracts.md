@@ -142,7 +142,7 @@ As an authorized party I {{ signer }} wish to unstake {{ unstake_cpu_quantity }}
 If I as signer am not the beneficial owner of these tokens I stipulate I have proof that I’ve been authorized to take this action by their beneficial owner(s).
 
 <h1 class="contract">
-   regprod
+   regproducer
 </h1>
 ---
 spec-version: 0.0
@@ -176,6 +176,24 @@ icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8b
 As an authorized party I {{ signer }} wish to vote on behalf of {{ voter }} in favor of the block producer candidates {{ producers }} with a voting weight equal to all tokens currently owned by {{ voter }} and staked for CPU or bandwidth.
 
 If I am not the beneficial owner of these shares I stipulate I have proof that I’ve been authorized to vote these shares by their beneficial owner(s).
+
+I stipulate I have not and will not accept anything of value in exchange for these votes, on penalty of confiscation of these tokens, and other penalties.
+
+I acknowledge that using any system of automatic voting, re-voting, or vote refreshing, or allowing such a system to be used on my behalf or on behalf of another, is forbidden and doing so violates this contract.
+
+<h1 class="contract">
+   regproxy
+</h1>
+---
+spec-version: 0.0
+title: Register an account as a proxy (for voting)  
+summary: The intent of the {{ regproxy }} action is to register an account as a proxy for voting.
+icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
+---
+
+As an authorized party I {{ signer }} wish to register as a {{ proxy }} account to vote on block producer candidates {{ producers }} with a voting weight equal to all tokens currently owned by {{ signer }} and tokens voted through registered {{ proxy }} by others. 
+
+If I am not the beneficial owner of these shares I stipulate I have proof that I’ve been authorized to register a proxy and vote these shares by their beneficial owner(s).
 
 I stipulate I have not and will not accept anything of value in exchange for these votes, on penalty of confiscation of these tokens, and other penalties.
 
