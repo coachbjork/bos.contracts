@@ -142,6 +142,17 @@ As an authorized party I {{ signer }} wish to unstake {{ unstake_cpu_quantity }}
 If I as signer am not the beneficial owner of these tokens I stipulate I have proof that I’ve been authorized to take this action by their beneficial owner(s).
 
 <h1 class="contract">
+   regprod
+</h1>
+---
+spec-version: 0.0
+title: register as Block Producer  
+summary: The {{ regprod }} action registers a new block producer candidate.
+icon: https://boscore.io/icon_256.png#b264b855c6d3335e5ee213443f679fb87c3633de8bc31cf66a766daac6dc6d7c
+---
+As an authorized party I {{ signer }} wish to register the block producer candidate {{ producer }}.
+
+<h1 class="contract">
    unregprod
 </h1>
 ---
